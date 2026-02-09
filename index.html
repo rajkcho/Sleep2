@@ -1317,14 +1317,14 @@
                                 <span class="slider-label">Revenue Growth (Monthly)</span>
                                 <span class="slider-value" id="revenueGrowthValue">10%</span>
                             </div>
-                            <input type="range" id="revenueGrowth" min="0" max="50" value="10" oninput="updateSlider(this); calculate();">
+                            <input type="range" id="revenueGrowth" min="0" max="50" value="10" oninput="updateSlider(this); calculate(); saveData();">
                         </div>
                         <div class="slider-group">
                             <div class="slider-header">
                                 <span class="slider-label">Expense Growth (Monthly)</span>
                                 <span class="slider-value" id="expenseGrowthValue">2%</span>
                             </div>
-                            <input type="range" id="expenseGrowth" min="0" max="20" value="2" oninput="updateSlider(this); calculate();">
+                            <input type="range" id="expenseGrowth" min="0" max="20" value="2" oninput="updateSlider(this); calculate(); saveData();">
                         </div>
                     </div>
 
@@ -1638,9 +1638,51 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
+            loadSavedData();
             calculate();
             initChart();
         });
+
+        // Save data to localStorage
+        function saveData() {
+            const data = {
+                cash: document.getElementById('cashInBank').value,
+                expenses: document.getElementById('monthlyExpenses').value,
+                revenue: document.getElementById('monthlyRevenue').value,
+                revenueGrowth: document.getElementById('revenueGrowth').value,
+                expenseGrowth: document.getElementById('expenseGrowth').value,
+                savedAt: new Date().toISOString()
+            };
+            localStorage.setItem('runwaycalc_data', JSON.stringify(data));
+        }
+
+        // Load saved data
+        function loadSavedData() {
+            const saved = localStorage.getItem('runwaycalc_data');
+            if (!saved) return;
+
+            try {
+                const data = JSON.parse(saved);
+                if (data.cash) document.getElementById('cashInBank').value = data.cash;
+                if (data.expenses) document.getElementById('monthlyExpenses').value = data.expenses;
+                if (data.revenue) document.getElementById('monthlyRevenue').value = data.revenue;
+                if (data.revenueGrowth) document.getElementById('revenueGrowth').value = data.revenueGrowth;
+                if (data.expenseGrowth) document.getElementById('expenseGrowth').value = data.expenseGrowth;
+
+                updateSlider(document.getElementById('revenueGrowth'));
+                updateSlider(document.getElementById('expenseGrowth'));
+            } catch (e) {
+                console.error('Failed to load saved data:', e);
+            }
+        }
+
+        // Auto-save on changes
+        function formatAndCalculate(input) {
+            const value = parseNumber(input.value);
+            input.value = formatNumber(value);
+            calculate();
+            saveData();
+        }
 
         // Format number with commas
         function formatNumber(num) {
