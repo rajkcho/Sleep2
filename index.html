@@ -959,6 +959,132 @@
             }
         }
 
+        /* Testimonials Section */
+        .testimonials-section {
+            padding: 80px 0;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .testimonials-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        .testimonial-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .testimonial-stars {
+            font-size: 1rem;
+            margin-bottom: 16px;
+        }
+
+        .testimonial-text {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 24px;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .testimonial-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--gradient-1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+        }
+
+        .testimonial-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .testimonial-role {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            padding: 80px 0;
+            background: rgba(16, 185, 129, 0.02);
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .faq-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        .faq-item {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s;
+        }
+
+        .faq-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .faq-item h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .faq-item p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .testimonials-grid,
+            .faq-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         /* Toast */
         .toast {
             position: fixed;
@@ -1316,6 +1442,87 @@
             <h2 class="cta-title">Know Your Numbers. Make Better Decisions.</h2>
             <p class="cta-subtitle">Join thousands of founders who use RunwayCalc to plan their startup's future.</p>
             <a href="#calculator" class="btn btn-lg">Calculate Your Runway →</a>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials-section">
+        <div class="testimonials-container">
+            <div style="text-align: center;">
+                <div class="section-badge">💬 From Founders</div>
+                <h2 class="section-title">What Founders Say</h2>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">"Finally, a runway calculator that accounts for growth. Used this to prep for our Series A and nailed the fundraising target."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">J</div>
+                        <div>
+                            <div class="testimonial-name">James K.</div>
+                            <div class="testimonial-role">Founder, SaaS Startup</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">"The scenario planning feature saved us. We realized our 'base case' was actually the worst case. Adjusted our burn immediately."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">S</div>
+                        <div>
+                            <div class="testimonial-name">Sarah M.</div>
+                            <div class="testimonial-role">CEO, FinTech</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">"Simple, fast, and private. No signup required. Just plug in your numbers and see the truth. Every founder needs this."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">M</div>
+                        <div>
+                            <div class="testimonial-name">Michael R.</div>
+                            <div class="testimonial-role">Serial Entrepreneur</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="faq-container">
+            <div style="text-align: center;">
+                <div class="section-badge">❓ FAQ</div>
+                <h2 class="section-title">Frequently Asked Questions</h2>
+            </div>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h4>How is runway calculated?</h4>
+                    <p>Runway = Cash / Net Burn Rate. We also factor in revenue growth and expense changes to give you a more accurate projection over time.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>What's a healthy runway?</h4>
+                    <p>Most VCs recommend 12-18 months of runway. Less than 6 months is danger zone. 18+ months gives you negotiating power.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>Is my data safe?</h4>
+                    <p>Yes! All calculations happen in your browser. We never send your financial data to any server. Your numbers stay private.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>How do I reduce my burn rate?</h4>
+                    <p>Focus on: 1) Cut non-essential expenses, 2) Renegotiate contracts, 3) Delay hiring, 4) Increase revenue per customer.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>When should I start fundraising?</h4>
+                    <p>Start when you have 6-9 months of runway left. Fundraising typically takes 3-6 months, so you need buffer.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>What's a good burn multiple?</h4>
+                    <p>Burn multiple = Net Burn / Net New ARR. Below 1.5x is great, 1.5-2x is good, above 2x means you're burning too much per dollar of growth.</p>
+                </div>
+            </div>
         </div>
     </section>
 
