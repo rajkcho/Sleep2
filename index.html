@@ -1154,6 +1154,48 @@
         .email-form button {
             white-space: nowrap;
         }
+
+        /* Actions Row */
+        .actions-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .action-btn {
+            flex: 1;
+            justify-content: center;
+            padding: 14px 16px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .actions-row {
+                flex-direction: column;
+            }
+        }
+
+        /* Print styles for PDF */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            
+            .results-panel, .results-panel * {
+                visibility: visible;
+            }
+            
+            .results-panel {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+
+            .actions-row, .email-capture {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1345,12 +1387,25 @@
                         </div>
                     </div>
 
+                    <!-- Actions Row -->
+                    <div class="actions-row">
+                        <button class="btn btn-secondary action-btn" onclick="shareResults()">
+                            📤 Share Results
+                        </button>
+                        <button class="btn btn-secondary action-btn" onclick="exportToPDF()">
+                            📄 Export PDF
+                        </button>
+                        <button class="btn btn-secondary action-btn" onclick="resetCalculator()">
+                            🔄 Reset
+                        </button>
+                    </div>
+
                     <!-- Email Capture -->
                     <div class="email-capture">
-                        <div class="email-capture-title">📧 Get Your Full Report (Free)</div>
+                        <div class="email-capture-title">📧 Get Weekly Startup Finance Tips (Free)</div>
                         <div class="email-form">
                             <input type="email" id="userEmail" placeholder="you@startup.com">
-                            <button class="btn btn-primary" onclick="captureEmail()">Send Report</button>
+                            <button class="btn btn-primary" onclick="captureEmail()">Subscribe</button>
                         </div>
                     </div>
                 </div>
@@ -1808,6 +1863,66 @@
             }
             
             projectionChart.update();
+        }
+
+        // Share results
+        function shareResults() {
+            const runway = document.getElementById('runwayMonths').textContent;
+            const netBurn = document.getElementById('netBurn').textContent;
+            const defaultDate = document.getElementById('defaultDate').textContent;
+            
+            const shareText = `📊 My Startup Runway Analysis:
+
+🚀 Runway: ${runway} months
+🔥 Net Burn: ${netBurn}/month
+💀 Default Date: ${defaultDate}
+
+Calculate yours at: https://rajkcho.github.io/Sleep2/
+
+#startup #founders #runwaycalculator`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My Startup Runway',
+                    text: shareText,
+                    url: 'https://rajkcho.github.io/Sleep2/'
+                }).catch(() => {
+                    copyToClipboard(shareText);
+                });
+            } else {
+                copyToClipboard(shareText);
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copied to clipboard! 📋', 'success');
+            }).catch(() => {
+                showToast('Failed to copy');
+            });
+        }
+
+        // Export to PDF
+        function exportToPDF() {
+            showToast('Preparing PDF... Print dialog will open', 'success');
+            setTimeout(() => {
+                window.print();
+            }, 500);
+        }
+
+        // Reset calculator
+        function resetCalculator() {
+            document.getElementById('cashInBank').value = '500,000';
+            document.getElementById('monthlyExpenses').value = '45,000';
+            document.getElementById('monthlyRevenue').value = '8,000';
+            document.getElementById('revenueGrowth').value = 10;
+            document.getElementById('expenseGrowth').value = 2;
+            
+            updateSlider(document.getElementById('revenueGrowth'));
+            updateSlider(document.getElementById('expenseGrowth'));
+            
+            calculate();
+            showToast('Calculator reset!', 'success');
         }
 
         // Email capture
