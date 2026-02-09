@@ -504,6 +504,56 @@
             color: var(--text-primary);
         }
 
+        .health-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            padding: 10px 20px;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .health-status.healthy {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--primary-light);
+        }
+
+        .health-status.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #FBBF24;
+        }
+
+        .health-status.danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #F87171;
+        }
+
+        .health-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .health-status.healthy .health-dot {
+            background: var(--primary);
+        }
+
+        .health-status.warning .health-dot {
+            background: #F59E0B;
+        }
+
+        .health-status.danger .health-dot {
+            background: var(--danger);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.9); }
+        }
+
         /* Stats Grid */
         .stats-grid {
             display: grid;
@@ -1343,6 +1393,10 @@
                         <div class="runway-date">
                             💀 Default Date: <strong id="defaultDate">Jan 2027</strong>
                         </div>
+                        <div class="health-status" id="healthStatus">
+                            <span class="health-dot"></span>
+                            <span class="health-text">Healthy Runway</span>
+                        </div>
                     </div>
 
                     <!-- Stats Grid -->
@@ -1789,6 +1843,33 @@
                 runwayCard.classList.add('danger');
             } else {
                 runwayCard.classList.remove('danger');
+            }
+
+            // Update health status
+            updateHealthStatus(months);
+        }
+
+        function updateHealthStatus(months) {
+            const healthStatus = document.getElementById('healthStatus');
+            const healthText = healthStatus.querySelector('.health-text');
+            
+            healthStatus.classList.remove('healthy', 'warning', 'danger');
+            
+            if (months >= 18) {
+                healthStatus.classList.add('healthy');
+                healthText.textContent = '✓ Strong Position - 18+ months';
+            } else if (months >= 12) {
+                healthStatus.classList.add('healthy');
+                healthText.textContent = '✓ Healthy Runway';
+            } else if (months >= 6) {
+                healthStatus.classList.add('warning');
+                healthText.textContent = '⚠️ Start Fundraising Now';
+            } else if (months >= 3) {
+                healthStatus.classList.add('danger');
+                healthText.textContent = '🚨 Critical - Less than 6 months';
+            } else {
+                healthStatus.classList.add('danger');
+                healthText.textContent = '💀 Emergency - Under 3 months';
             }
         }
 
