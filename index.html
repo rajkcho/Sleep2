@@ -1228,6 +1228,58 @@
             white-space: nowrap;
         }
 
+        /* Tips Section */
+        .tips-section {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid var(--glass-border);
+            margin-top: 24px;
+        }
+
+        .tips-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .tips-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tip-item {
+            display: flex;
+            gap: 12px;
+            padding: 14px;
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
+        .tip-item.urgent {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .tip-item.warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .tip-item.positive {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .tip-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
         /* Presets Row */
         .presets-row {
             display: flex;
@@ -1498,6 +1550,14 @@
                                 <div class="fundraising-months">36 months</div>
                                 <div class="fundraising-amount" id="raise36">$1.3M</div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Tips Section -->
+                    <div class="tips-section" id="tipsSection">
+                        <h3 class="tips-title">💡 Recommendations</h3>
+                        <div class="tips-list" id="tipsList">
+                            <!-- Dynamically populated -->
                         </div>
                     </div>
 
@@ -1822,6 +1882,13 @@
             
             // Update chart
             updateChart(runwayData.projection);
+            
+            // Generate and render tips
+            const netBurn = expenses - revenue;
+            const newMRR = revenue * revenueGrowth;
+            const burnMultiple = newMRR > 0 ? (netBurn / newMRR).toFixed(1) : '∞';
+            const tips = generateTips(runwayData.months, netBurn, burnMultiple, expenses, revenue);
+            renderTips(tips);
         }
 
         function calculateRunway(cash, expenses, revenue, revenueGrowth, expenseGrowth) {
@@ -1873,6 +1940,93 @@
 
             // Update health status
             updateHealthStatus(months);
+        }
+
+        function generateTips(months, netBurn, burnMultiple, expenses, revenue) {
+            const tips = [];
+            
+            // Runway-based tips
+            if (months < 6) {
+                tips.push({
+                    icon: '🚨',
+                    text: 'Start fundraising immediately. With less than 6 months runway, you need to act now.',
+                    type: 'urgent'
+                });
+            } else if (months < 12) {
+                tips.push({
+                    icon: '⏰',
+                    text: 'Begin fundraising conversations. Most rounds take 3-6 months to close.',
+                    type: 'warning'
+                });
+            }
+            
+            // Burn-based tips
+            if (netBurn > 0 && netBurn > revenue * 2) {
+                tips.push({
+                    icon: '✂️',
+                    text: 'Your burn is 2x+ your revenue. Look for expenses to cut or pause.',
+                    type: 'warning'
+                });
+            }
+            
+            // Revenue-based tips
+            if (revenue === 0) {
+                tips.push({
+                    icon: '💰',
+                    text: 'No revenue yet. Focus on getting your first paying customers.',
+                    type: 'warning'
+                });
+            } else if (revenue < expenses * 0.2) {
+                tips.push({
+                    icon: '📈',
+                    text: 'Revenue covers <20% of expenses. Focus on growth or reduce costs.',
+                    type: 'warning'
+                });
+            } else if (revenue >= expenses) {
+                tips.push({
+                    icon: '🎉',
+                    text: "You're profitable! Focus on sustainable growth from this position.",
+                    type: 'positive'
+                });
+            }
+            
+            // Burn multiple tips
+            const bm = parseFloat(burnMultiple);
+            if (bm > 3 && revenue > 0) {
+                tips.push({
+                    icon: '⚠️',
+                    text: `Burn multiple of ${burnMultiple} is high. VCs prefer <2x. Improve unit economics.`,
+                    type: 'warning'
+                });
+            } else if (bm <= 1.5 && revenue > 0) {
+                tips.push({
+                    icon: '✅',
+                    text: 'Excellent burn multiple. You have efficient growth that VCs love.',
+                    type: 'positive'
+                });
+            }
+            
+            // Positive tips if doing well
+            if (months >= 18) {
+                tips.push({
+                    icon: '💪',
+                    text: 'Strong runway gives you negotiating power. Take time to find the right investors.',
+                    type: 'positive'
+                });
+            }
+            
+            // Limit to 3 tips
+            return tips.slice(0, 3);
+        }
+
+        function renderTips(tips) {
+            const tipsList = document.getElementById('tipsList');
+            tipsList.innerHTML = tips.map(tip => `
+                <div class="tip-item ${tip.type}">
+                    <span class="tip-icon">${tip.icon}</span>
+                    <span>${tip.text}</span>
+                </div>
+            `).join('');
         }
 
         function updateHealthStatus(months) {
