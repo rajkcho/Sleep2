@@ -600,6 +600,29 @@
             color: var(--text-muted);
         }
 
+        .stat-benchmark {
+            font-size: 0.75rem;
+            margin-top: 8px;
+            padding: 4px 10px;
+            border-radius: 100px;
+            display: inline-block;
+        }
+
+        .stat-benchmark.good {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--primary-light);
+        }
+
+        .stat-benchmark.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #FBBF24;
+        }
+
+        .stat-benchmark.bad {
+            background: rgba(239, 68, 68, 0.1);
+            color: #F87171;
+        }
+
         /* Chart Card */
         .chart-card {
             background: var(--bg-card);
@@ -1401,20 +1424,23 @@
 
                     <!-- Stats Grid -->
                     <div class="stats-grid">
-                        <div class="stat-card">
+                        <div class="stat-card" title="Monthly cash outflow minus revenue. Negative = burning cash.">
                             <div class="stat-icon">🔥</div>
                             <div class="stat-value negative" id="netBurn">-$37K</div>
                             <div class="stat-label">Net Burn / Month</div>
+                            <div class="stat-benchmark" id="burnBenchmark">High burn</div>
                         </div>
-                        <div class="stat-card">
+                        <div class="stat-card" title="Net Burn ÷ New ARR. Below 1.5x is excellent, 2x+ means too much burn per $ of growth.">
                             <div class="stat-icon">📉</div>
                             <div class="stat-value" id="burnMultiple">5.6x</div>
                             <div class="stat-label">Burn Multiple</div>
+                            <div class="stat-benchmark" id="burnMultipleBenchmark">Target: &lt;2x</div>
                         </div>
-                        <div class="stat-card">
+                        <div class="stat-card" title="How many months until revenue covers all expenses.">
                             <div class="stat-icon">🎯</div>
                             <div class="stat-value" id="breakevenMonths">24</div>
                             <div class="stat-label">Months to Breakeven</div>
+                            <div class="stat-benchmark" id="breakevenBenchmark">On track</div>
                         </div>
                     </div>
 
@@ -1878,15 +1904,51 @@
             document.getElementById('netBurn').textContent = (netBurn >= 0 ? '-' : '+') + formatCurrency(Math.abs(netBurn));
             document.getElementById('netBurn').className = 'stat-value ' + (netBurn > 0 ? 'negative' : 'positive');
             
+            // Burn benchmark
+            const burnBenchmark = document.getElementById('burnBenchmark');
+            if (netBurn <= 0) {
+                burnBenchmark.textContent = 'Profitable!';
+                burnBenchmark.className = 'stat-benchmark good';
+            } else if (netBurn < expenses * 0.3) {
+                burnBenchmark.textContent = 'Low burn';
+                burnBenchmark.className = 'stat-benchmark good';
+            } else if (netBurn < expenses * 0.6) {
+                burnBenchmark.textContent = 'Moderate burn';
+                burnBenchmark.className = 'stat-benchmark warning';
+            } else {
+                burnBenchmark.textContent = 'High burn';
+                burnBenchmark.className = 'stat-benchmark bad';
+            }
+            
             // Burn multiple = net burn / new ARR
             const newMRR = revenue * revenueGrowth;
             const burnMultiple = newMRR > 0 ? (netBurn / newMRR).toFixed(1) : '∞';
             document.getElementById('burnMultiple').textContent = burnMultiple + 'x';
             
+            // Burn multiple benchmark
+            const bmBenchmark = document.getElementById('burnMultipleBenchmark');
+            const bmValue = parseFloat(burnMultiple);
+            if (bmValue <= 1.5) {
+                bmBenchmark.textContent = 'Excellent!';
+                bmBenchmark.className = 'stat-benchmark good';
+            } else if (bmValue <= 2.5) {
+                bmBenchmark.textContent = 'Good';
+                bmBenchmark.className = 'stat-benchmark good';
+            } else if (bmValue <= 4) {
+                bmBenchmark.textContent = 'Needs work';
+                bmBenchmark.className = 'stat-benchmark warning';
+            } else {
+                bmBenchmark.textContent = 'Too high';
+                bmBenchmark.className = 'stat-benchmark bad';
+            }
+            
             // Months to breakeven
+            let breakevenMonths;
             if (netBurn <= 0) {
+                breakevenMonths = 0;
                 document.getElementById('breakevenMonths').textContent = '✓';
             } else if (revenueGrowth <= 0) {
+                breakevenMonths = 999;
                 document.getElementById('breakevenMonths').textContent = '∞';
             } else {
                 // Simplified calculation
@@ -1896,7 +1958,24 @@
                     currentRevenue *= (1 + revenueGrowth);
                     months++;
                 }
+                breakevenMonths = months;
                 document.getElementById('breakevenMonths').textContent = months < 60 ? months : '60+';
+            }
+            
+            // Breakeven benchmark
+            const beBenchmark = document.getElementById('breakevenBenchmark');
+            if (breakevenMonths === 0) {
+                beBenchmark.textContent = 'Already profitable!';
+                beBenchmark.className = 'stat-benchmark good';
+            } else if (breakevenMonths <= 12) {
+                beBenchmark.textContent = 'On track';
+                beBenchmark.className = 'stat-benchmark good';
+            } else if (breakevenMonths <= 24) {
+                beBenchmark.textContent = 'Moderate';
+                beBenchmark.className = 'stat-benchmark warning';
+            } else {
+                beBenchmark.textContent = 'Long runway needed';
+                beBenchmark.className = 'stat-benchmark bad';
             }
         }
 
