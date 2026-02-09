@@ -1155,6 +1155,33 @@
             white-space: nowrap;
         }
 
+        /* Presets Row */
+        .presets-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .preset-btn {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .preset-btn:hover {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--primary);
+            color: var(--primary-light);
+        }
+
         /* Actions Row */
         .actions-row {
             display: flex;
@@ -1245,6 +1272,13 @@
                 <!-- Input Panel -->
                 <div class="input-panel">
                     <h2 class="panel-title">📊 Your Numbers</h2>
+                    
+                    <!-- Presets -->
+                    <div class="presets-row">
+                        <button class="preset-btn" onclick="loadPreset('bootstrapped')">🥾 Bootstrapped</button>
+                        <button class="preset-btn" onclick="loadPreset('seed')">🌱 Seed Stage</button>
+                        <button class="preset-btn" onclick="loadPreset('seriesA')">🚀 Series A</button>
+                    </div>
                     
                     <div class="input-section">
                         <div class="input-section-title">💰 Current Position</div>
@@ -1908,6 +1942,51 @@ Calculate yours at: https://rajkcho.github.io/Sleep2/
             setTimeout(() => {
                 window.print();
             }, 500);
+        }
+
+        // Startup presets
+        const STARTUP_PRESETS = {
+            bootstrapped: {
+                name: 'Bootstrapped',
+                cash: 50000,
+                expenses: 5000,
+                revenue: 3000,
+                revenueGrowth: 8,
+                expenseGrowth: 1
+            },
+            seed: {
+                name: 'Seed Stage',
+                cash: 500000,
+                expenses: 45000,
+                revenue: 8000,
+                revenueGrowth: 15,
+                expenseGrowth: 3
+            },
+            seriesA: {
+                name: 'Series A',
+                cash: 5000000,
+                expenses: 350000,
+                revenue: 80000,
+                revenueGrowth: 12,
+                expenseGrowth: 5
+            }
+        };
+
+        function loadPreset(presetName) {
+            const preset = STARTUP_PRESETS[presetName];
+            if (!preset) return;
+
+            document.getElementById('cashInBank').value = formatNumber(preset.cash);
+            document.getElementById('monthlyExpenses').value = formatNumber(preset.expenses);
+            document.getElementById('monthlyRevenue').value = formatNumber(preset.revenue);
+            document.getElementById('revenueGrowth').value = preset.revenueGrowth;
+            document.getElementById('expenseGrowth').value = preset.expenseGrowth;
+
+            updateSlider(document.getElementById('revenueGrowth'));
+            updateSlider(document.getElementById('expenseGrowth'));
+
+            calculate();
+            showToast(`Loaded ${preset.name} preset!`, 'success');
         }
 
         // Reset calculator
