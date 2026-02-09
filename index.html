@@ -3,2443 +3,591 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RunwayCalc | Know Exactly When Your Startup Runs Out of Money</title>
-    
-    <!-- SEO -->
-    <meta name="description" content="Free startup runway calculator. Know exactly how many months until you run out of cash. Scenario planning, burn rate analysis, and fundraising targets for founders.">
-    <meta name="keywords" content="startup runway calculator, burn rate calculator, startup cash flow, when will my startup run out of money, fundraising calculator, startup finance">
-    <meta name="author" content="Raj Chopra">
-    
-    <!-- Open Graph -->
-    <meta property="og:title" content="RunwayCalc | Know Exactly When Your Startup Runs Out of Money">
-    <meta property="og:description" content="Free startup runway calculator with scenario planning. Know your burn rate, runway, and fundraising targets.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://rajkcho.github.io/Sleep2/">
-    
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="RunwayCalc | Startup Runway Calculator">
-    <meta name="twitter:description" content="Know exactly when your startup runs out of money. Free calculator with scenario planning.">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- Chart.js -->
+    <title>RunwayCalc — SaaS Runway & Burn Rate Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-bg {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
         }
-
-        :root {
-            --primary: #10B981;
-            --primary-light: #34D399;
-            --primary-dark: #059669;
-            --secondary: #6366F1;
-            --accent: #F59E0B;
-            --danger: #EF4444;
-            --warning: #F59E0B;
-            --bg-dark: #0A0F1C;
-            --bg-card: #111827;
-            --bg-elevated: #1F2937;
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --text-primary: #F9FAFB;
-            --text-secondary: #9CA3AF;
-            --text-muted: #6B7280;
-            --gradient-1: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            --gradient-2: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
-            --gradient-danger: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-        html {
-            scroll-behavior: smooth;
+        .glow {
+            box-shadow: 0 0 40px rgba(99, 102, 241, 0.3);
         }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-primary);
-            line-height: 1.6;
-            min-height: 100vh;
+        .input-dark {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(99, 102, 241, 0.3);
         }
-
-        /* Background */
-        .bg-grid {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: -1;
-            background-image: 
-                linear-gradient(rgba(16, 185, 129, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(16, 185, 129, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
+        .input-dark:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
         }
-
-        .bg-gradient {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: -2;
-            background: 
-                radial-gradient(ellipse at 20% 0%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 100%, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
-        }
-
-        /* Navigation */
-        nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            padding: 16px 0;
-            background: rgba(10, 15, 28, 0.9);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo-text {
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:hover {
-            color: var(--text-primary);
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: var(--gradient-1);
-            color: white;
-            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
-        }
-
-        .btn-secondary {
-            background: var(--glass);
-            color: var(--text-primary);
-            border: 1px solid var(--glass-border);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.08);
-        }
-
-        .btn-lg {
-            padding: 18px 36px;
-            font-size: 1.1rem;
-        }
-
-        /* Hero */
-        .hero {
-            padding: 160px 0 100px;
-            text-align: center;
-        }
-
-        .hero-container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 100px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--primary-light);
-            margin-bottom: 32px;
-            animation: fadeInUp 0.6s ease forwards;
-        }
-
-        .hero-title {
-            font-size: 4rem;
-            font-weight: 900;
-            line-height: 1.1;
-            margin-bottom: 24px;
-            letter-spacing: -2px;
-            animation: fadeInUp 0.6s ease 0.1s forwards;
-            opacity: 0;
-        }
-
-        .hero-title .highlight {
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-subtitle {
-            font-size: 1.35rem;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto 40px;
-            animation: fadeInUp 0.6s ease 0.2s forwards;
-            opacity: 0;
-        }
-
-        .hero-cta {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            animation: fadeInUp 0.6s ease 0.3s forwards;
-            opacity: 0;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Calculator Section */
-        .calculator-section {
-            padding: 80px 0;
-        }
-
-        .calculator-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        .calculator-grid {
-            display: grid;
-            grid-template-columns: 400px 1fr;
-            gap: 40px;
-        }
-
-        /* Input Panel */
-        .input-panel {
-            background: var(--bg-card);
-            border-radius: 24px;
-            padding: 32px;
-            border: 1px solid var(--glass-border);
-            height: fit-content;
-            position: sticky;
-            top: 100px;
-        }
-
-        .panel-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .input-section {
-            margin-bottom: 28px;
-        }
-
-        .input-section:last-child {
-            margin-bottom: 0;
-        }
-
-        .input-section-title {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 16px;
-        }
-
-        .input-group {
-            margin-bottom: 16px;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-
-        .input-wrapper {
-            position: relative;
-        }
-
-        .input-wrapper input {
-            width: 100%;
-            padding: 14px 16px;
-            padding-left: 36px;
-            background: var(--bg-elevated);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-size: 1rem;
-            font-family: inherit;
-            transition: all 0.3s ease;
-        }
-
-        .input-wrapper input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-        }
-
-        .input-prefix {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
-
-        .input-suffix {
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .input-hint {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 6px;
-        }
-
-        /* Slider Input */
-        .slider-group {
-            margin-bottom: 20px;
-        }
-
-        .slider-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .slider-label {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-        }
-
-        .slider-value {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--primary-light);
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 8px;
-            -webkit-appearance: none;
-            background: var(--bg-elevated);
-            border-radius: 4px;
-            outline: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 24px;
-            height: 24px;
-            background: var(--gradient-1);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-            transition: transform 0.2s;
-        }
-
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.1);
-        }
-
-        /* Results Panel */
-        .results-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        /* Runway Card - Main Result */
-        .runway-card {
-            background: var(--bg-card);
-            border-radius: 24px;
-            padding: 40px;
-            border: 1px solid var(--glass-border);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .runway-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--gradient-1);
-        }
-
-        .runway-card.danger::before {
-            background: var(--gradient-danger);
-        }
-
-        .runway-label {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 16px;
-        }
-
-        .runway-value {
-            font-size: 6rem;
-            font-weight: 900;
-            line-height: 1;
-            margin-bottom: 8px;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .runway-card.danger .runway-value {
-            background: var(--gradient-danger);
-            -webkit-background-clip: text;
-            background-clip: text;
-        }
-
-        .runway-unit {
-            font-size: 1.5rem;
-            color: var(--text-secondary);
-            margin-bottom: 24px;
-        }
-
-        .runway-date {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            background: var(--bg-elevated);
-            border-radius: 100px;
-            font-size: 1rem;
-            color: var(--text-secondary);
-        }
-
-        .runway-date strong {
-            color: var(--text-primary);
-        }
-
-        .health-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 20px;
-            padding: 10px 20px;
-            border-radius: 100px;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .health-status.healthy {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--primary-light);
-        }
-
-        .health-status.warning {
-            background: rgba(245, 158, 11, 0.1);
-            color: #FBBF24;
-        }
-
-        .health-status.danger {
-            background: rgba(239, 68, 68, 0.1);
-            color: #F87171;
-        }
-
-        .health-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        .health-status.healthy .health-dot {
-            background: var(--primary);
-        }
-
-        .health-status.warning .health-dot {
-            background: #F59E0B;
-        }
-
-        .health-status.danger .health-dot {
-            background: var(--danger);
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(0.9); }
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-        }
-
         .stat-card {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid var(--glass-border);
-            text-align: center;
-            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.2);
         }
-
-        .stat-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
+        .danger { border-color: rgba(239, 68, 68, 0.5); background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%); }
+        .warning { border-color: rgba(245, 158, 11, 0.5); background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.1) 100%); }
+        .success { border-color: rgba(34, 197, 94, 0.5); background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(22, 163, 74, 0.1) 100%); }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
-
-        .stat-icon {
-            font-size: 2rem;
-            margin-bottom: 12px;
-        }
-
-        .stat-value {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        .stat-value.positive {
-            color: var(--primary-light);
-        }
-
-        .stat-value.negative {
-            color: var(--danger);
-        }
-
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .stat-benchmark {
-            font-size: 0.75rem;
-            margin-top: 8px;
-            padding: 4px 10px;
-            border-radius: 100px;
-            display: inline-block;
-        }
-
-        .stat-benchmark.good {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--primary-light);
-        }
-
-        .stat-benchmark.warning {
-            background: rgba(245, 158, 11, 0.1);
-            color: #FBBF24;
-        }
-
-        .stat-benchmark.bad {
-            background: rgba(239, 68, 68, 0.1);
-            color: #F87171;
-        }
-
-        /* Chart Card */
-        .chart-card {
-            background: var(--bg-card);
-            border-radius: 24px;
-            padding: 32px;
-            border: 1px solid var(--glass-border);
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .chart-title {
-            font-size: 1.15rem;
-            font-weight: 700;
-        }
-
-        .chart-container {
-            height: 300px;
-            position: relative;
-        }
-
-        /* Scenario Cards */
-        .scenarios-section {
-            margin-top: 24px;
-        }
-
-        .scenarios-title {
-            font-size: 1.15rem;
-            font-weight: 700;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .scenarios-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-        }
-
-        .scenario-card {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid var(--glass-border);
-            transition: all 0.3s ease;
-        }
-
-        .scenario-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .scenario-card.best {
-            border-color: var(--primary);
-        }
-
-        .scenario-card.worst {
-            border-color: var(--danger);
-        }
-
-        .scenario-name {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 12px;
-        }
-
-        .scenario-value {
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin-bottom: 4px;
-        }
-
-        .scenario-card.best .scenario-value {
-            color: var(--primary-light);
-        }
-
-        .scenario-card.base .scenario-value {
-            color: var(--secondary);
-        }
-
-        .scenario-card.worst .scenario-value {
-            color: var(--danger);
-        }
-
-        .scenario-detail {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        /* Fundraising Calculator */
-        .fundraising-section {
-            background: var(--bg-card);
-            border-radius: 24px;
-            padding: 32px;
-            border: 1px solid var(--glass-border);
-            margin-top: 24px;
-        }
-
-        .fundraising-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .fundraising-title {
-            font-size: 1.15rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .fundraising-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-        }
-
-        .fundraising-option {
-            background: var(--bg-elevated);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .fundraising-option:hover {
-            border-color: var(--primary);
-        }
-
-        .fundraising-option.selected {
-            border-color: var(--primary);
-            background: rgba(16, 185, 129, 0.1);
-        }
-
-        .fundraising-months {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
-
-        .fundraising-amount {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--primary-light);
-        }
-
-        /* Partners Section */
-        .partners-section {
-            padding: 80px 0;
-            border-top: 1px solid var(--glass-border);
-        }
-
-        .partners-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 0 24px;
-            text-align: center;
-        }
-
-        .section-badge {
-            display: inline-block;
-            padding: 8px 16px;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 100px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--primary-light);
-            margin-bottom: 16px;
-        }
-
-        .section-title {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 16px;
-        }
-
-        .section-subtitle {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            margin-bottom: 48px;
-        }
-
-        .partners-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-        }
-
-        .partner-card {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 32px 24px;
-            border: 1px solid var(--glass-border);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .partner-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-        }
-
-        .partner-logo {
-            font-size: 2.5rem;
-            margin-bottom: 16px;
-        }
-
-        .partner-name {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-        }
-
-        .partner-desc {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            text-align: center;
-            margin-bottom: 16px;
-        }
-
-        .partner-cta {
-            font-size: 0.85rem;
-            color: var(--primary-light);
-            font-weight: 600;
-        }
-
-        /* Features Section */
-        .features-section {
-            padding: 80px 0;
-        }
-
-        .features-container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-            margin-top: 48px;
-        }
-
-        .feature-card {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 32px;
-            border: 1px solid var(--glass-border);
-            transition: all 0.3s ease;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-        }
-
-        .feature-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        .feature-desc {
-            font-size: 0.95rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        /* CTA Section */
-        .cta-section {
-            padding: 100px 0;
-            background: var(--gradient-1);
-            text-align: center;
-        }
-
-        .cta-container {
-            max-width: 700px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        .cta-title {
-            font-size: 2.5rem;
-            font-weight: 800;
+        .float { animation: float 3s ease-in-out infinite; }
+        .scenario-btn.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: white;
-            margin-bottom: 16px;
-        }
-
-        .cta-subtitle {
-            font-size: 1.2rem;
-            color: rgba(255,255,255,0.8);
-            margin-bottom: 32px;
-        }
-
-        .cta-section .btn {
-            background: white;
-            color: var(--primary-dark);
-        }
-
-        /* Footer */
-        .footer {
-            padding: 48px 0;
-            border-top: 1px solid var(--glass-border);
-            text-align: center;
-        }
-
-        .footer-text {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .footer-text a {
-            color: var(--primary-light);
-            text-decoration: none;
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 1024px) {
-            .calculator-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .input-panel {
-                position: static;
-            }
-
-            .hero-title {
-                font-size: 3rem;
-            }
-
-            .nav-links {
-                display: none;
-            }
-
-            .stats-grid,
-            .scenarios-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .fundraising-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .partners-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .features-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.5rem;
-            }
-
-            .hero-cta {
-                flex-direction: column;
-            }
-
-            .runway-value {
-                font-size: 4rem;
-            }
-
-            .stats-grid,
-            .scenarios-grid,
-            .fundraising-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .partners-grid,
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .section-title {
-                font-size: 2rem;
-            }
-
-            .cta-title {
-                font-size: 2rem;
-            }
-        }
-
-        /* Testimonials Section */
-        .testimonials-section {
-            padding: 80px 0;
-            border-top: 1px solid var(--glass-border);
-        }
-
-        .testimonials-container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        .testimonials-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-            margin-top: 48px;
-        }
-
-        .testimonial-card {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 32px;
-            border: 1px solid var(--glass-border);
-            transition: all 0.3s ease;
-        }
-
-        .testimonial-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-        }
-
-        .testimonial-stars {
-            font-size: 1rem;
-            margin-bottom: 16px;
-        }
-
-        .testimonial-text {
-            font-size: 1rem;
-            color: var(--text-secondary);
-            line-height: 1.7;
-            margin-bottom: 24px;
-            font-style: italic;
-        }
-
-        .testimonial-author {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .testimonial-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: var(--gradient-1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: white;
-        }
-
-        .testimonial-name {
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .testimonial-role {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        /* FAQ Section */
-        .faq-section {
-            padding: 80px 0;
-            background: rgba(16, 185, 129, 0.02);
-            border-top: 1px solid var(--glass-border);
-        }
-
-        .faq-container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        .faq-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
-            margin-top: 48px;
-        }
-
-        .faq-item {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid var(--glass-border);
-            transition: all 0.3s;
-        }
-
-        .faq-item:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        .faq-item h4 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: var(--text-primary);
-        }
-
-        .faq-item p {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        @media (max-width: 768px) {
-            .testimonials-grid,
-            .faq-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Toast */
-        .toast {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            padding: 16px 24px;
-            background: var(--bg-card);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.4s ease;
-            z-index: 3000;
-        }
-
-        .toast.visible {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .toast.success {
-            border-color: var(--primary);
-        }
-
-        /* Animations */
-        .animate-in {
-            animation: fadeInUp 0.6s ease forwards;
-        }
-
-        /* Email capture */
-        .email-capture {
-            background: var(--bg-elevated);
-            border-radius: 16px;
-            padding: 24px;
-            margin-top: 24px;
-        }
-
-        .email-capture-title {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-
-        .email-form {
-            display: flex;
-            gap: 12px;
-        }
-
-        .email-form input {
-            flex: 1;
-            padding: 14px 16px;
-            background: var(--bg-card);
-            border: 1px solid var(--glass-border);
-            border-radius: 10px;
-            color: var(--text-primary);
-            font-size: 0.95rem;
-        }
-
-        .email-form input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .email-form button {
-            white-space: nowrap;
-        }
-
-        /* Tips Section */
-        .tips-section {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 24px;
-            border: 1px solid var(--glass-border);
-            margin-top: 24px;
-        }
-
-        .tips-title {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-
-        .tips-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .tip-item {
-            display: flex;
-            gap: 12px;
-            padding: 14px;
-            background: var(--bg-elevated);
-            border-radius: 12px;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            color: var(--text-secondary);
-        }
-
-        .tip-item.urgent {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .tip-item.warning {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-
-        .tip-item.positive {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        .tip-icon {
-            font-size: 1.25rem;
-            flex-shrink: 0;
-        }
-
-        /* Presets Row */
-        .presets-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 24px;
-        }
-
-        .preset-btn {
-            flex: 1;
-            padding: 10px 12px;
-            border-radius: 10px;
-            background: var(--bg-elevated);
-            border: 1px solid var(--glass-border);
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-        }
-
-        .preset-btn:hover {
-            background: rgba(16, 185, 129, 0.1);
-            border-color: var(--primary);
-            color: var(--primary-light);
-        }
-
-        /* Actions Row */
-        .actions-row {
-            display: flex;
-            gap: 12px;
-            margin-top: 24px;
-        }
-
-        .action-btn {
-            flex: 1;
-            justify-content: center;
-            padding: 14px 16px;
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 768px) {
-            .actions-row {
-                flex-direction: column;
-            }
-        }
-
-        /* Print styles for PDF */
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            
-            .results-panel, .results-panel * {
-                visibility: visible;
-            }
-            
-            .results-panel {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-            }
-
-            .actions-row, .email-capture {
-                display: none !important;
-            }
         }
     </style>
 </head>
-<body>
-    <div class="bg-grid"></div>
-    <div class="bg-gradient"></div>
-
-    <!-- Navigation -->
-    <nav>
-        <div class="nav-container">
-            <div class="logo">
-                <span>🚀</span>
-                <span class="logo-text">RunwayCalc</span>
+<body class="gradient-bg min-h-screen text-white">
+    <!-- Nav -->
+    <nav class="container mx-auto px-6 py-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                </div>
+                <span class="text-xl font-bold">RunwayCalc</span>
             </div>
-            <ul class="nav-links">
-                <li><a href="#calculator">Calculator</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#partners">Tools</a></li>
-            </ul>
-            <a href="#calculator" class="btn btn-primary">Calculate Now</a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#calculator" class="text-gray-300 hover:text-white transition">Calculator</a>
+                <a href="#scenarios" class="text-gray-300 hover:text-white transition">Scenarios</a>
+                <a href="#faq" class="text-gray-300 hover:text-white transition">FAQ</a>
+            </div>
         </div>
     </nav>
 
     <!-- Hero -->
-    <section class="hero">
-        <div class="hero-container">
-            <div class="hero-badge">
-                <span>🎯</span>
-                <span>Free • No Sign Up • Instant Results</span>
-            </div>
-            <h1 class="hero-title">
-                Know <span class="highlight">Exactly</span> When Your Startup Runs Out of Money
-            </h1>
-            <p class="hero-subtitle">
-                Calculate your runway, model scenarios, and know exactly how much to raise. Built for founders by founders.
-            </p>
-            <div class="hero-cta">
-                <a href="#calculator" class="btn btn-primary btn-lg">Calculate Your Runway →</a>
-                <a href="#features" class="btn btn-secondary btn-lg">See Features</a>
-            </div>
+    <section class="container mx-auto px-6 py-12 text-center">
+        <div class="inline-flex items-center px-4 py-2 rounded-full glass text-sm text-indigo-300 mb-6">
+            <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+            Free forever • No signup required
         </div>
+        <h1 class="text-4xl md:text-6xl font-extrabold mb-6">
+            Know Your <span class="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Runway</span>
+        </h1>
+        <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-8">
+            Calculate your startup's runway, model growth scenarios, and plan your path to profitability. Used by 10,000+ founders.
+        </p>
     </section>
 
-    <!-- Calculator Section -->
-    <section class="calculator-section" id="calculator">
-        <div class="calculator-container">
-            <div class="calculator-grid">
+    <!-- Calculator -->
+    <section id="calculator" class="container mx-auto px-6 py-8">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid lg:grid-cols-2 gap-8">
                 <!-- Input Panel -->
-                <div class="input-panel">
-                    <h2 class="panel-title">📊 Your Numbers</h2>
+                <div class="glass rounded-2xl p-8 glow">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                        Your Numbers
+                    </h2>
                     
-                    <!-- Presets -->
-                    <div class="presets-row">
-                        <button class="preset-btn" onclick="loadPreset('bootstrapped')">🥾 Bootstrapped</button>
-                        <button class="preset-btn" onclick="loadPreset('seed')">🌱 Seed Stage</button>
-                        <button class="preset-btn" onclick="loadPreset('seriesA')">🚀 Series A</button>
-                    </div>
-                    
-                    <div class="input-section">
-                        <div class="input-section-title">💰 Current Position</div>
-                        <div class="input-group">
-                            <label>Cash in Bank</label>
-                            <div class="input-wrapper">
-                                <span class="input-prefix">$</span>
-                                <input type="text" id="cashInBank" value="500,000" oninput="formatAndCalculate(this)">
+                    <div class="space-y-6">
+                        <!-- Cash on Hand -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Cash on Hand</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                                <input type="text" id="cash" value="500,000" 
+                                    class="w-full pl-8 pr-4 py-3 rounded-xl input-dark text-white focus:outline-none transition"
+                                    oninput="formatNumber(this); calculate()">
+                            </div>
+                        </div>
+
+                        <!-- Monthly Revenue (MRR) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Monthly Revenue (MRR)</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                                <input type="text" id="mrr" value="25,000" 
+                                    class="w-full pl-8 pr-4 py-3 rounded-xl input-dark text-white focus:outline-none transition"
+                                    oninput="formatNumber(this); calculate()">
+                            </div>
+                        </div>
+
+                        <!-- Monthly Expenses -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Monthly Expenses (Burn)</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                                <input type="text" id="expenses" value="75,000" 
+                                    class="w-full pl-8 pr-4 py-3 rounded-xl input-dark text-white focus:outline-none transition"
+                                    oninput="formatNumber(this); calculate()">
+                            </div>
+                        </div>
+
+                        <!-- Monthly Growth Rate -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Monthly Revenue Growth</label>
+                            <div class="relative">
+                                <input type="number" id="growth" value="10" step="0.5"
+                                    class="w-full pl-4 pr-8 py-3 rounded-xl input-dark text-white focus:outline-none transition"
+                                    oninput="calculate()">
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">%</span>
+                            </div>
+                        </div>
+
+                        <!-- Expense Growth -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Monthly Expense Growth</label>
+                            <div class="relative">
+                                <input type="number" id="expenseGrowth" value="2" step="0.5"
+                                    class="w-full pl-4 pr-8 py-3 rounded-xl input-dark text-white focus:outline-none transition"
+                                    oninput="calculate()">
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">%</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="input-section">
-                        <div class="input-section-title">🔥 Monthly Burn</div>
-                        <div class="input-group">
-                            <label>Monthly Expenses</label>
-                            <div class="input-wrapper">
-                                <span class="input-prefix">$</span>
-                                <input type="text" id="monthlyExpenses" value="45,000" oninput="formatAndCalculate(this)">
-                            </div>
-                            <div class="input-hint">Salaries, rent, tools, marketing, etc.</div>
-                        </div>
-                        <div class="input-group">
-                            <label>Monthly Revenue</label>
-                            <div class="input-wrapper">
-                                <span class="input-prefix">$</span>
-                                <input type="text" id="monthlyRevenue" value="8,000" oninput="formatAndCalculate(this)">
-                            </div>
+                    <!-- Scenario Buttons -->
+                    <div id="scenarios" class="mt-8">
+                        <label class="block text-sm font-medium text-gray-300 mb-3">Quick Scenarios</label>
+                        <div class="grid grid-cols-3 gap-3">
+                            <button onclick="setScenario('conservative')" class="scenario-btn px-4 py-2 rounded-lg glass text-sm font-medium hover:bg-white/10 transition">
+                                🐢 Conservative
+                            </button>
+                            <button onclick="setScenario('moderate')" class="scenario-btn active px-4 py-2 rounded-lg glass text-sm font-medium hover:bg-white/10 transition">
+                                📈 Moderate
+                            </button>
+                            <button onclick="setScenario('aggressive')" class="scenario-btn px-4 py-2 rounded-lg glass text-sm font-medium hover:bg-white/10 transition">
+                                🚀 Aggressive
+                            </button>
                         </div>
                     </div>
-
-                    <div class="input-section">
-                        <div class="input-section-title">📈 Growth Assumptions</div>
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <span class="slider-label">Revenue Growth (Monthly)</span>
-                                <span class="slider-value" id="revenueGrowthValue">10%</span>
-                            </div>
-                            <input type="range" id="revenueGrowth" min="0" max="50" value="10" oninput="updateSlider(this); calculate(); saveData();">
-                        </div>
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <span class="slider-label">Expense Growth (Monthly)</span>
-                                <span class="slider-value" id="expenseGrowthValue">2%</span>
-                            </div>
-                            <input type="range" id="expenseGrowth" min="0" max="20" value="2" oninput="updateSlider(this); calculate(); saveData();">
-                        </div>
-                    </div>
-
-                    <button class="btn btn-primary" style="width: 100%; margin-top: 16px;" onclick="calculate()">
-                        🔄 Recalculate
-                    </button>
                 </div>
 
                 <!-- Results Panel -->
-                <div class="results-panel">
-                    <!-- Main Runway Card -->
-                    <div class="runway-card" id="runwayCard">
-                        <div class="runway-label">Your Runway</div>
-                        <div class="runway-value" id="runwayMonths">11</div>
-                        <div class="runway-unit">months</div>
-                        <div class="runway-date">
-                            💀 Default Date: <strong id="defaultDate">Jan 2027</strong>
+                <div class="space-y-6">
+                    <!-- Key Metrics -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div id="runwayCard" class="stat-card rounded-2xl p-6">
+                            <div class="text-sm text-gray-400 mb-1">Runway</div>
+                            <div id="runwayValue" class="text-3xl font-bold text-white">10 months</div>
+                            <div id="runwayDate" class="text-sm text-gray-500 mt-1">Until Dec 2026</div>
                         </div>
-                        <div class="health-status" id="healthStatus">
-                            <span class="health-dot"></span>
-                            <span class="health-text">Healthy Runway</span>
+                        <div class="stat-card rounded-2xl p-6">
+                            <div class="text-sm text-gray-400 mb-1">Net Burn</div>
+                            <div id="burnValue" class="text-3xl font-bold text-red-400">-$50,000</div>
+                            <div class="text-sm text-gray-500 mt-1">per month</div>
                         </div>
-                    </div>
-
-                    <!-- Stats Grid -->
-                    <div class="stats-grid">
-                        <div class="stat-card" title="Monthly cash outflow minus revenue. Negative = burning cash.">
-                            <div class="stat-icon">🔥</div>
-                            <div class="stat-value negative" id="netBurn">-$37K</div>
-                            <div class="stat-label">Net Burn / Month</div>
-                            <div class="stat-benchmark" id="burnBenchmark">High burn</div>
+                        <div class="stat-card rounded-2xl p-6">
+                            <div class="text-sm text-gray-400 mb-1">Break-Even</div>
+                            <div id="breakEvenValue" class="text-3xl font-bold text-white">8 months</div>
+                            <div id="breakEvenDate" class="text-sm text-gray-500 mt-1">Oct 2026</div>
                         </div>
-                        <div class="stat-card" title="Net Burn ÷ New ARR. Below 1.5x is excellent, 2x+ means too much burn per $ of growth.">
-                            <div class="stat-icon">📉</div>
-                            <div class="stat-value" id="burnMultiple">5.6x</div>
-                            <div class="stat-label">Burn Multiple</div>
-                            <div class="stat-benchmark" id="burnMultipleBenchmark">Target: &lt;2x</div>
-                        </div>
-                        <div class="stat-card" title="How many months until revenue covers all expenses.">
-                            <div class="stat-icon">🎯</div>
-                            <div class="stat-value" id="breakevenMonths">24</div>
-                            <div class="stat-label">Months to Breakeven</div>
-                            <div class="stat-benchmark" id="breakevenBenchmark">On track</div>
+                        <div class="stat-card rounded-2xl p-6">
+                            <div class="text-sm text-gray-400 mb-1">Default Dead?</div>
+                            <div id="defaultDead" class="text-3xl font-bold text-green-400">No ✓</div>
+                            <div id="defaultDeadNote" class="text-sm text-gray-500 mt-1">You'll survive</div>
                         </div>
                     </div>
 
                     <!-- Chart -->
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">📈 Cash Projection</h3>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="projectionChart"></canvas>
-                        </div>
+                    <div class="glass rounded-2xl p-6">
+                        <h3 class="text-lg font-semibold mb-4">Cash Projection (24 months)</h3>
+                        <canvas id="projectionChart" height="200"></canvas>
                     </div>
 
-                    <!-- Scenarios -->
-                    <div class="scenarios-section">
-                        <h3 class="scenarios-title">🎲 Scenario Analysis</h3>
-                        <div class="scenarios-grid">
-                            <div class="scenario-card best">
-                                <div class="scenario-name">Best Case</div>
-                                <div class="scenario-value" id="bestCase">18</div>
-                                <div class="scenario-detail">months runway</div>
-                            </div>
-                            <div class="scenario-card base">
-                                <div class="scenario-name">Base Case</div>
-                                <div class="scenario-value" id="baseCase">11</div>
-                                <div class="scenario-detail">months runway</div>
-                            </div>
-                            <div class="scenario-card worst">
-                                <div class="scenario-name">Worst Case</div>
-                                <div class="scenario-value" id="worstCase">7</div>
-                                <div class="scenario-detail">months runway</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Fundraising Calculator -->
-                    <div class="fundraising-section">
-                        <div class="fundraising-header">
-                            <h3 class="fundraising-title">💸 How Much Should You Raise?</h3>
-                        </div>
-                        <div class="fundraising-grid">
-                            <div class="fundraising-option" onclick="selectFundraising(12)">
-                                <div class="fundraising-months">12 months</div>
-                                <div class="fundraising-amount" id="raise12">$444K</div>
-                            </div>
-                            <div class="fundraising-option selected" onclick="selectFundraising(18)">
-                                <div class="fundraising-months">18 months</div>
-                                <div class="fundraising-amount" id="raise18">$666K</div>
-                            </div>
-                            <div class="fundraising-option" onclick="selectFundraising(24)">
-                                <div class="fundraising-months">24 months</div>
-                                <div class="fundraising-amount" id="raise24">$888K</div>
-                            </div>
-                            <div class="fundraising-option" onclick="selectFundraising(36)">
-                                <div class="fundraising-months">36 months</div>
-                                <div class="fundraising-amount" id="raise36">$1.3M</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tips Section -->
-                    <div class="tips-section" id="tipsSection">
-                        <h3 class="tips-title">💡 Recommendations</h3>
-                        <div class="tips-list" id="tipsList">
-                            <!-- Dynamically populated -->
-                        </div>
-                    </div>
-
-                    <!-- Actions Row -->
-                    <div class="actions-row">
-                        <button class="btn btn-secondary action-btn" onclick="shareResults()">
-                            📤 Share Results
-                        </button>
-                        <button class="btn btn-secondary action-btn" onclick="exportToPDF()">
-                            📄 Export PDF
-                        </button>
-                        <button class="btn btn-secondary action-btn" onclick="resetCalculator()">
-                            🔄 Reset
-                        </button>
-                    </div>
-
-                    <!-- Email Capture -->
-                    <div class="email-capture">
-                        <div class="email-capture-title">📧 Get Weekly Startup Finance Tips (Free)</div>
-                        <div class="email-form">
-                            <input type="email" id="userEmail" placeholder="you@startup.com">
-                            <button class="btn btn-primary" onclick="captureEmail()">Subscribe</button>
-                        </div>
+                    <!-- Monthly Table -->
+                    <div class="glass rounded-2xl p-6 max-h-64 overflow-y-auto">
+                        <h3 class="text-lg font-semibold mb-4">Monthly Breakdown</h3>
+                        <table class="w-full text-sm">
+                            <thead class="text-gray-400 text-left">
+                                <tr>
+                                    <th class="pb-3">Month</th>
+                                    <th class="pb-3">Revenue</th>
+                                    <th class="pb-3">Expenses</th>
+                                    <th class="pb-3">Net</th>
+                                    <th class="pb-3">Cash</th>
+                                </tr>
+                            </thead>
+                            <tbody id="monthlyTable" class="text-gray-300">
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Partners Section -->
-    <section class="partners-section" id="partners">
-        <div class="partners-container">
-            <div class="section-badge">🛠️ Tools We Recommend</div>
-            <h2 class="section-title">Startup Tools That Actually Help</h2>
-            <p class="section-subtitle">The tools top startups use to manage their finances</p>
-            <div class="partners-grid">
-                <a href="https://mercury.com" target="_blank" rel="noopener" class="partner-card">
-                    <div class="partner-logo">🏦</div>
-                    <div class="partner-name">Mercury</div>
-                    <div class="partner-desc">Banking built for startups. No fees, powerful tools.</div>
-                    <div class="partner-cta">Open Free Account →</div>
-                </a>
-                <a href="https://stripe.com/atlas" target="_blank" rel="noopener" class="partner-card">
-                    <div class="partner-logo">⚡</div>
-                    <div class="partner-name">Stripe Atlas</div>
-                    <div class="partner-desc">Incorporate your startup in Delaware in days.</div>
-                    <div class="partner-cta">Start Your Company →</div>
-                </a>
-                <a href="https://carta.com" target="_blank" rel="noopener" class="partner-card">
-                    <div class="partner-logo">📊</div>
-                    <div class="partner-name">Carta</div>
-                    <div class="partner-desc">Cap table management and equity planning.</div>
-                    <div class="partner-cta">Manage Equity →</div>
-                </a>
-                <a href="https://brex.com" target="_blank" rel="noopener" class="partner-card">
-                    <div class="partner-logo">💳</div>
-                    <div class="partner-name">Brex</div>
-                    <div class="partner-desc">Corporate cards with 10-20x higher limits.</div>
-                    <div class="partner-cta">Get Your Card →</div>
-                </a>
+    <!-- Pro Features CTA -->
+    <section class="container mx-auto px-6 py-16">
+        <div class="max-w-4xl mx-auto glass rounded-2xl p-8 md:p-12 text-center glow">
+            <div class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm mb-4">
+                Coming Soon
+            </div>
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">RunwayCalc Pro</h2>
+            <p class="text-gray-400 mb-8 max-w-xl mx-auto">
+                Save scenarios, export to Excel, share with investors, track actuals vs projections, and get AI-powered insights.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="joinWaitlist()" class="px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl font-semibold hover:opacity-90 transition">
+                    Join Waitlist — It's Free
+                </button>
+                <button onclick="exportPDF()" class="px-8 py-3 glass rounded-xl font-semibold hover:bg-white/10 transition flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Export PDF
+                </button>
             </div>
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section class="features-section" id="features">
-        <div class="features-container">
-            <div style="text-align: center;">
-                <div class="section-badge">✨ Features</div>
-                <h2 class="section-title">Built for Founders Who Move Fast</h2>
-                <p class="section-subtitle">Everything you need to understand your startup's financial health.</p>
-            </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🎯</div>
-                    <h3 class="feature-title">Instant Runway Calculation</h3>
-                    <p class="feature-desc">See exactly how many months of runway you have based on your current cash and burn rate.</p>
+    <!-- FAQ -->
+    <section id="faq" class="container mx-auto px-6 py-16">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+            <div class="space-y-4">
+                <div class="glass rounded-xl p-6">
+                    <h3 class="font-semibold mb-2">How is runway calculated?</h3>
+                    <p class="text-gray-400">Runway = Cash ÷ Net Monthly Burn. We project forward month-by-month, accounting for revenue growth and expense increases, until cash hits zero or you become profitable.</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📈</div>
-                    <h3 class="feature-title">Growth Modeling</h3>
-                    <p class="feature-desc">Factor in revenue growth and expense changes to see how your runway evolves over time.</p>
+                <div class="glass rounded-xl p-6">
+                    <h3 class="font-semibold mb-2">What is "Default Dead"?</h3>
+                    <p class="text-gray-400">A term coined by Paul Graham. If your current trajectory leads to running out of money before becoming profitable (and you're not growing fast enough to raise), you're "default dead." If you'll survive, you're "default alive."</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🎲</div>
-                    <h3 class="feature-title">Scenario Planning</h3>
-                    <p class="feature-desc">See best, base, and worst case scenarios to plan for different outcomes.</p>
+                <div class="glass rounded-xl p-6">
+                    <h3 class="font-semibold mb-2">How much runway should I have?</h3>
+                    <p class="text-gray-400">Most VCs recommend 18-24 months of runway. Less than 6 months is dangerous territory — start fundraising or cutting costs immediately.</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">💸</div>
-                    <h3 class="feature-title">Fundraising Calculator</h3>
-                    <p class="feature-desc">Know exactly how much to raise for 12, 18, 24, or 36 months of runway.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3 class="feature-title">Visual Projections</h3>
-                    <p class="feature-desc">Beautiful charts showing your cash projection over the next 24 months.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
-                    <h3 class="feature-title">100% Private</h3>
-                    <p class="feature-desc">All calculations happen in your browser. We never see your numbers.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="cta-section">
-        <div class="cta-container">
-            <h2 class="cta-title">Know Your Numbers. Make Better Decisions.</h2>
-            <p class="cta-subtitle">Join thousands of founders who use RunwayCalc to plan their startup's future.</p>
-            <a href="#calculator" class="btn btn-lg">Calculate Your Runway →</a>
-        </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section class="testimonials-section">
-        <div class="testimonials-container">
-            <div style="text-align: center;">
-                <div class="section-badge">💬 From Founders</div>
-                <h2 class="section-title">What Founders Say</h2>
-            </div>
-            <div class="testimonials-grid">
-                <div class="testimonial-card">
-                    <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
-                    <p class="testimonial-text">"Finally, a runway calculator that accounts for growth. Used this to prep for our Series A and nailed the fundraising target."</p>
-                    <div class="testimonial-author">
-                        <div class="testimonial-avatar">J</div>
-                        <div>
-                            <div class="testimonial-name">James K.</div>
-                            <div class="testimonial-role">Founder, SaaS Startup</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
-                    <p class="testimonial-text">"The scenario planning feature saved us. We realized our 'base case' was actually the worst case. Adjusted our burn immediately."</p>
-                    <div class="testimonial-author">
-                        <div class="testimonial-avatar">S</div>
-                        <div>
-                            <div class="testimonial-name">Sarah M.</div>
-                            <div class="testimonial-role">CEO, FinTech</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
-                    <p class="testimonial-text">"Simple, fast, and private. No signup required. Just plug in your numbers and see the truth. Every founder needs this."</p>
-                    <div class="testimonial-author">
-                        <div class="testimonial-avatar">M</div>
-                        <div>
-                            <div class="testimonial-name">Michael R.</div>
-                            <div class="testimonial-role">Serial Entrepreneur</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FAQ Section -->
-    <section class="faq-section">
-        <div class="faq-container">
-            <div style="text-align: center;">
-                <div class="section-badge">❓ FAQ</div>
-                <h2 class="section-title">Frequently Asked Questions</h2>
-            </div>
-            <div class="faq-grid">
-                <div class="faq-item">
-                    <h4>How is runway calculated?</h4>
-                    <p>Runway = Cash / Net Burn Rate. We also factor in revenue growth and expense changes to give you a more accurate projection over time.</p>
-                </div>
-                <div class="faq-item">
-                    <h4>What's a healthy runway?</h4>
-                    <p>Most VCs recommend 12-18 months of runway. Less than 6 months is danger zone. 18+ months gives you negotiating power.</p>
-                </div>
-                <div class="faq-item">
-                    <h4>Is my data safe?</h4>
-                    <p>Yes! All calculations happen in your browser. We never send your financial data to any server. Your numbers stay private.</p>
-                </div>
-                <div class="faq-item">
-                    <h4>How do I reduce my burn rate?</h4>
-                    <p>Focus on: 1) Cut non-essential expenses, 2) Renegotiate contracts, 3) Delay hiring, 4) Increase revenue per customer.</p>
-                </div>
-                <div class="faq-item">
-                    <h4>When should I start fundraising?</h4>
-                    <p>Start when you have 6-9 months of runway left. Fundraising typically takes 3-6 months, so you need buffer.</p>
-                </div>
-                <div class="faq-item">
-                    <h4>What's a good burn multiple?</h4>
-                    <p>Burn multiple = Net Burn / Net New ARR. Below 1.5x is great, 1.5-2x is good, above 2x means you're burning too much per dollar of growth.</p>
+                <div class="glass rounded-xl p-6">
+                    <h3 class="font-semibold mb-2">Is my data saved anywhere?</h3>
+                    <p class="text-gray-400">No. All calculations happen in your browser. We don't store any of your financial data. Your numbers never leave your device.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-text">
-            Built with ☕ by <a href="https://github.com/rajkcho" target="_blank">Raj Chopra</a> • 
-            © 2025 RunwayCalc • 
-            <a href="#calculator">Calculate Now</a>
+    <footer class="container mx-auto px-6 py-12 border-t border-white/10">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                </div>
+                <span class="font-semibold">RunwayCalc</span>
+            </div>
+            <p class="text-gray-500 text-sm">© 2026 RunwayCalc. Free for founders, forever.</p>
         </div>
     </footer>
 
-    <!-- Toast -->
-    <div class="toast" id="toast">
-        <span id="toastMessage"></span>
+    <!-- Waitlist Modal -->
+    <div id="waitlistModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="glass rounded-2xl p-8 max-w-md mx-4 glow">
+            <h3 class="text-2xl font-bold mb-4">Join the Pro Waitlist</h3>
+            <p class="text-gray-400 mb-6">Be first to access scenario saving, Excel exports, and investor-ready reports.</p>
+            <input type="email" id="waitlistEmail" placeholder="you@startup.com" 
+                class="w-full px-4 py-3 rounded-xl input-dark text-white focus:outline-none transition mb-4">
+            <div class="flex gap-3">
+                <button onclick="submitWaitlist()" class="flex-1 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl font-semibold hover:opacity-90 transition">
+                    Join Waitlist
+                </button>
+                <button onclick="closeWaitlist()" class="px-4 py-3 glass rounded-xl hover:bg-white/10 transition">
+                    ✕
+                </button>
+            </div>
+        </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
-        // ============================================
-        // RUNWAYCALC - MAIN APPLICATION
-        // ============================================
-
-        let projectionChart = null;
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            loadSavedData();
-            calculate();
-            initChart();
-        });
-
-        // Save data to localStorage
-        function saveData() {
-            const data = {
-                cash: document.getElementById('cashInBank').value,
-                expenses: document.getElementById('monthlyExpenses').value,
-                revenue: document.getElementById('monthlyRevenue').value,
-                revenueGrowth: document.getElementById('revenueGrowth').value,
-                expenseGrowth: document.getElementById('expenseGrowth').value,
-                savedAt: new Date().toISOString()
-            };
-            localStorage.setItem('runwaycalc_data', JSON.stringify(data));
-        }
-
-        // Load saved data
-        function loadSavedData() {
-            const saved = localStorage.getItem('runwaycalc_data');
-            if (!saved) return;
-
-            try {
-                const data = JSON.parse(saved);
-                if (data.cash) document.getElementById('cashInBank').value = data.cash;
-                if (data.expenses) document.getElementById('monthlyExpenses').value = data.expenses;
-                if (data.revenue) document.getElementById('monthlyRevenue').value = data.revenue;
-                if (data.revenueGrowth) document.getElementById('revenueGrowth').value = data.revenueGrowth;
-                if (data.expenseGrowth) document.getElementById('expenseGrowth').value = data.expenseGrowth;
-
-                updateSlider(document.getElementById('revenueGrowth'));
-                updateSlider(document.getElementById('expenseGrowth'));
-            } catch (e) {
-                console.error('Failed to load saved data:', e);
-            }
-        }
-
-        // Auto-save on changes
-        function formatAndCalculate(input) {
-            const value = parseNumber(input.value);
-            input.value = formatNumber(value);
-            calculate();
-            saveData();
-        }
+        let chart = null;
+        let projectionData = [];
 
         // Format number with commas
-        function formatNumber(num) {
-            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        }
-
-        // Parse formatted number
-        function parseNumber(str) {
-            return parseFloat(str.replace(/[^0-9.-]+/g, '')) || 0;
-        }
-
-        // Format currency
-        function formatCurrency(num) {
-            if (Math.abs(num) >= 1000000) {
-                return '$' + (num / 1000000).toFixed(1) + 'M';
-            } else if (Math.abs(num) >= 1000) {
-                return '$' + (num / 1000).toFixed(0) + 'K';
+        function formatNumber(input) {
+            let value = input.value.replace(/,/g, '').replace(/[^\d]/g, '');
+            if (value) {
+                input.value = parseInt(value).toLocaleString();
             }
-            return '$' + formatNumber(Math.round(num));
         }
 
-        // Format and recalculate
-        function formatAndCalculate(input) {
-            const value = parseNumber(input.value);
-            input.value = formatNumber(value);
+        // Parse number from formatted string
+        function parseNum(id) {
+            const val = document.getElementById(id).value.replace(/,/g, '');
+            return parseFloat(val) || 0;
+        }
+
+        // Set scenario presets
+        function setScenario(type) {
+            document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const scenarios = {
+                conservative: { growth: 5, expenseGrowth: 3 },
+                moderate: { growth: 10, expenseGrowth: 2 },
+                aggressive: { growth: 20, expenseGrowth: 5 }
+            };
+            
+            document.getElementById('growth').value = scenarios[type].growth;
+            document.getElementById('expenseGrowth').value = scenarios[type].expenseGrowth;
             calculate();
-        }
-
-        // Update slider display
-        function updateSlider(slider) {
-            const valueEl = document.getElementById(slider.id + 'Value');
-            valueEl.textContent = slider.value + '%';
         }
 
         // Main calculation
         function calculate() {
-            const cash = parseNumber(document.getElementById('cashInBank').value);
-            const expenses = parseNumber(document.getElementById('monthlyExpenses').value);
-            const revenue = parseNumber(document.getElementById('monthlyRevenue').value);
-            const revenueGrowth = parseFloat(document.getElementById('revenueGrowth').value) / 100;
-            const expenseGrowth = parseFloat(document.getElementById('expenseGrowth').value) / 100;
-
-            // Calculate runway with growth
-            const runwayData = calculateRunway(cash, expenses, revenue, revenueGrowth, expenseGrowth);
+            const cash = parseNum('cash');
+            const mrr = parseNum('mrr');
+            const expenses = parseNum('expenses');
+            const growthRate = parseFloat(document.getElementById('growth').value) / 100;
+            const expenseGrowthRate = parseFloat(document.getElementById('expenseGrowth').value) / 100;
             
-            // Update main display
-            updateMainDisplay(runwayData);
+            const netBurn = expenses - mrr;
+            document.getElementById('burnValue').textContent = (netBurn > 0 ? '-' : '+') + '$' + Math.abs(netBurn).toLocaleString();
+            document.getElementById('burnValue').className = 'text-3xl font-bold ' + (netBurn > 0 ? 'text-red-400' : 'text-green-400');
             
-            // Update stats
-            updateStats(expenses, revenue, revenueGrowth);
+            // Project 24 months
+            projectionData = [];
+            let currentCash = cash;
+            let currentRevenue = mrr;
+            let currentExpenses = expenses;
+            let runwayMonths = 0;
+            let breakEvenMonth = null;
             
-            // Update scenarios
-            updateScenarios(cash, expenses, revenue);
+            const now = new Date();
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             
-            // Update fundraising
-            updateFundraising(expenses, revenue);
+            for (let i = 0; i <= 24; i++) {
+                const monthDate = new Date(now.getFullYear(), now.getMonth() + i, 1);
+                const monthLabel = monthNames[monthDate.getMonth()] + ' ' + monthDate.getFullYear();
+                
+                const net = currentRevenue - currentExpenses;
+                
+                projectionData.push({
+                    month: i,
+                    label: monthLabel,
+                    revenue: Math.round(currentRevenue),
+                    expenses: Math.round(currentExpenses),
+                    net: Math.round(net),
+                    cash: Math.round(currentCash)
+                });
+                
+                if (currentCash > 0 && runwayMonths === 0) {
+                    // Still have runway
+                }
+                
+                if (net >= 0 && breakEvenMonth === null && i > 0) {
+                    breakEvenMonth = i;
+                }
+                
+                currentCash += net;
+                currentRevenue *= (1 + growthRate);
+                currentExpenses *= (1 + expenseGrowthRate);
+            }
+            
+            // Calculate runway (when cash goes negative)
+            runwayMonths = projectionData.findIndex(d => d.cash < 0);
+            if (runwayMonths === -1) runwayMonths = 24; // More than 24 months
+            
+            // Update UI
+            const runwayCard = document.getElementById('runwayCard');
+            if (runwayMonths <= 6) {
+                runwayCard.className = 'stat-card danger rounded-2xl p-6';
+            } else if (runwayMonths <= 12) {
+                runwayCard.className = 'stat-card warning rounded-2xl p-6';
+            } else {
+                runwayCard.className = 'stat-card success rounded-2xl p-6';
+            }
+            
+            document.getElementById('runwayValue').textContent = runwayMonths >= 24 ? '24+ months' : runwayMonths + ' months';
+            
+            const runwayDate = new Date(now.getFullYear(), now.getMonth() + runwayMonths, 1);
+            document.getElementById('runwayDate').textContent = runwayMonths >= 24 ? 'Sustainable!' : 'Until ' + monthNames[runwayDate.getMonth()] + ' ' + runwayDate.getFullYear();
+            
+            // Break-even
+            if (breakEvenMonth !== null) {
+                document.getElementById('breakEvenValue').textContent = breakEvenMonth + ' months';
+                const beDate = new Date(now.getFullYear(), now.getMonth() + breakEvenMonth, 1);
+                document.getElementById('breakEvenDate').textContent = monthNames[beDate.getMonth()] + ' ' + beDate.getFullYear();
+            } else if (mrr >= expenses) {
+                document.getElementById('breakEvenValue').textContent = 'Now!';
+                document.getElementById('breakEvenDate').textContent = 'Already profitable';
+            } else {
+                document.getElementById('breakEvenValue').textContent = 'Never';
+                document.getElementById('breakEvenDate').textContent = 'Need more growth';
+            }
+            
+            // Default dead check
+            const defaultDead = (breakEvenMonth === null || breakEvenMonth > runwayMonths) && runwayMonths < 24;
+            document.getElementById('defaultDead').textContent = defaultDead ? 'Yes ⚠️' : 'No ✓';
+            document.getElementById('defaultDead').className = 'text-3xl font-bold ' + (defaultDead ? 'text-red-400' : 'text-green-400');
+            document.getElementById('defaultDeadNote').textContent = defaultDead ? 'Act now!' : 'You\'ll survive';
             
             // Update chart
-            updateChart(runwayData.projection);
+            updateChart();
             
-            // Generate and render tips
-            const netBurn = expenses - revenue;
-            const newMRR = revenue * revenueGrowth;
-            const burnMultiple = newMRR > 0 ? (netBurn / newMRR).toFixed(1) : '∞';
-            const tips = generateTips(runwayData.months, netBurn, burnMultiple, expenses, revenue);
-            renderTips(tips);
+            // Update table
+            updateTable();
         }
 
-        function calculateRunway(cash, expenses, revenue, revenueGrowth, expenseGrowth) {
-            let currentCash = cash;
-            let currentRevenue = revenue;
-            let currentExpenses = expenses;
-            let months = 0;
-            const projection = [{ month: 0, cash: currentCash, revenue: currentRevenue, expenses: currentExpenses }];
-            
-            while (currentCash > 0 && months < 60) {
-                months++;
-                currentRevenue *= (1 + revenueGrowth);
-                currentExpenses *= (1 + expenseGrowth);
-                const netBurn = currentExpenses - currentRevenue;
-                currentCash -= netBurn;
-                
-                projection.push({
-                    month: months,
-                    cash: Math.max(0, currentCash),
-                    revenue: currentRevenue,
-                    expenses: currentExpenses,
-                    netBurn: netBurn
-                });
-                
-                if (currentCash <= 0) break;
-            }
-            
-            return { months, projection };
-        }
-
-        function updateMainDisplay(runwayData) {
-            const months = runwayData.months;
-            const runwayCard = document.getElementById('runwayCard');
-            
-            document.getElementById('runwayMonths').textContent = months;
-            
-            // Calculate default date
-            const defaultDate = new Date();
-            defaultDate.setMonth(defaultDate.getMonth() + months);
-            const options = { month: 'short', year: 'numeric' };
-            document.getElementById('defaultDate').textContent = defaultDate.toLocaleDateString('en-US', options);
-            
-            // Set card color based on runway
-            if (months <= 6) {
-                runwayCard.classList.add('danger');
-            } else {
-                runwayCard.classList.remove('danger');
-            }
-
-            // Update health status
-            updateHealthStatus(months);
-        }
-
-        function generateTips(months, netBurn, burnMultiple, expenses, revenue) {
-            const tips = [];
-            
-            // Runway-based tips
-            if (months < 6) {
-                tips.push({
-                    icon: '🚨',
-                    text: 'Start fundraising immediately. With less than 6 months runway, you need to act now.',
-                    type: 'urgent'
-                });
-            } else if (months < 12) {
-                tips.push({
-                    icon: '⏰',
-                    text: 'Begin fundraising conversations. Most rounds take 3-6 months to close.',
-                    type: 'warning'
-                });
-            }
-            
-            // Burn-based tips
-            if (netBurn > 0 && netBurn > revenue * 2) {
-                tips.push({
-                    icon: '✂️',
-                    text: 'Your burn is 2x+ your revenue. Look for expenses to cut or pause.',
-                    type: 'warning'
-                });
-            }
-            
-            // Revenue-based tips
-            if (revenue === 0) {
-                tips.push({
-                    icon: '💰',
-                    text: 'No revenue yet. Focus on getting your first paying customers.',
-                    type: 'warning'
-                });
-            } else if (revenue < expenses * 0.2) {
-                tips.push({
-                    icon: '📈',
-                    text: 'Revenue covers <20% of expenses. Focus on growth or reduce costs.',
-                    type: 'warning'
-                });
-            } else if (revenue >= expenses) {
-                tips.push({
-                    icon: '🎉',
-                    text: "You're profitable! Focus on sustainable growth from this position.",
-                    type: 'positive'
-                });
-            }
-            
-            // Burn multiple tips
-            const bm = parseFloat(burnMultiple);
-            if (bm > 3 && revenue > 0) {
-                tips.push({
-                    icon: '⚠️',
-                    text: `Burn multiple of ${burnMultiple} is high. VCs prefer <2x. Improve unit economics.`,
-                    type: 'warning'
-                });
-            } else if (bm <= 1.5 && revenue > 0) {
-                tips.push({
-                    icon: '✅',
-                    text: 'Excellent burn multiple. You have efficient growth that VCs love.',
-                    type: 'positive'
-                });
-            }
-            
-            // Positive tips if doing well
-            if (months >= 18) {
-                tips.push({
-                    icon: '💪',
-                    text: 'Strong runway gives you negotiating power. Take time to find the right investors.',
-                    type: 'positive'
-                });
-            }
-            
-            // Limit to 3 tips
-            return tips.slice(0, 3);
-        }
-
-        function renderTips(tips) {
-            const tipsList = document.getElementById('tipsList');
-            tipsList.innerHTML = tips.map(tip => `
-                <div class="tip-item ${tip.type}">
-                    <span class="tip-icon">${tip.icon}</span>
-                    <span>${tip.text}</span>
-                </div>
-            `).join('');
-        }
-
-        function updateHealthStatus(months) {
-            const healthStatus = document.getElementById('healthStatus');
-            const healthText = healthStatus.querySelector('.health-text');
-            
-            healthStatus.classList.remove('healthy', 'warning', 'danger');
-            
-            if (months >= 18) {
-                healthStatus.classList.add('healthy');
-                healthText.textContent = '✓ Strong Position - 18+ months';
-            } else if (months >= 12) {
-                healthStatus.classList.add('healthy');
-                healthText.textContent = '✓ Healthy Runway';
-            } else if (months >= 6) {
-                healthStatus.classList.add('warning');
-                healthText.textContent = '⚠️ Start Fundraising Now';
-            } else if (months >= 3) {
-                healthStatus.classList.add('danger');
-                healthText.textContent = '🚨 Critical - Less than 6 months';
-            } else {
-                healthStatus.classList.add('danger');
-                healthText.textContent = '💀 Emergency - Under 3 months';
-            }
-        }
-
-        function updateStats(expenses, revenue, revenueGrowth) {
-            const netBurn = expenses - revenue;
-            document.getElementById('netBurn').textContent = (netBurn >= 0 ? '-' : '+') + formatCurrency(Math.abs(netBurn));
-            document.getElementById('netBurn').className = 'stat-value ' + (netBurn > 0 ? 'negative' : 'positive');
-            
-            // Burn benchmark
-            const burnBenchmark = document.getElementById('burnBenchmark');
-            if (netBurn <= 0) {
-                burnBenchmark.textContent = 'Profitable!';
-                burnBenchmark.className = 'stat-benchmark good';
-            } else if (netBurn < expenses * 0.3) {
-                burnBenchmark.textContent = 'Low burn';
-                burnBenchmark.className = 'stat-benchmark good';
-            } else if (netBurn < expenses * 0.6) {
-                burnBenchmark.textContent = 'Moderate burn';
-                burnBenchmark.className = 'stat-benchmark warning';
-            } else {
-                burnBenchmark.textContent = 'High burn';
-                burnBenchmark.className = 'stat-benchmark bad';
-            }
-            
-            // Burn multiple = net burn / new ARR
-            const newMRR = revenue * revenueGrowth;
-            const burnMultiple = newMRR > 0 ? (netBurn / newMRR).toFixed(1) : '∞';
-            document.getElementById('burnMultiple').textContent = burnMultiple + 'x';
-            
-            // Burn multiple benchmark
-            const bmBenchmark = document.getElementById('burnMultipleBenchmark');
-            const bmValue = parseFloat(burnMultiple);
-            if (bmValue <= 1.5) {
-                bmBenchmark.textContent = 'Excellent!';
-                bmBenchmark.className = 'stat-benchmark good';
-            } else if (bmValue <= 2.5) {
-                bmBenchmark.textContent = 'Good';
-                bmBenchmark.className = 'stat-benchmark good';
-            } else if (bmValue <= 4) {
-                bmBenchmark.textContent = 'Needs work';
-                bmBenchmark.className = 'stat-benchmark warning';
-            } else {
-                bmBenchmark.textContent = 'Too high';
-                bmBenchmark.className = 'stat-benchmark bad';
-            }
-            
-            // Months to breakeven
-            let breakevenMonths;
-            if (netBurn <= 0) {
-                breakevenMonths = 0;
-                document.getElementById('breakevenMonths').textContent = '✓';
-            } else if (revenueGrowth <= 0) {
-                breakevenMonths = 999;
-                document.getElementById('breakevenMonths').textContent = '∞';
-            } else {
-                // Simplified calculation
-                let months = 0;
-                let currentRevenue = revenue;
-                while (currentRevenue < expenses && months < 60) {
-                    currentRevenue *= (1 + revenueGrowth);
-                    months++;
-                }
-                breakevenMonths = months;
-                document.getElementById('breakevenMonths').textContent = months < 60 ? months : '60+';
-            }
-            
-            // Breakeven benchmark
-            const beBenchmark = document.getElementById('breakevenBenchmark');
-            if (breakevenMonths === 0) {
-                beBenchmark.textContent = 'Already profitable!';
-                beBenchmark.className = 'stat-benchmark good';
-            } else if (breakevenMonths <= 12) {
-                beBenchmark.textContent = 'On track';
-                beBenchmark.className = 'stat-benchmark good';
-            } else if (breakevenMonths <= 24) {
-                beBenchmark.textContent = 'Moderate';
-                beBenchmark.className = 'stat-benchmark warning';
-            } else {
-                beBenchmark.textContent = 'Long runway needed';
-                beBenchmark.className = 'stat-benchmark bad';
-            }
-        }
-
-        function updateScenarios(cash, expenses, revenue) {
-            // Best case: 20% higher revenue growth, 50% lower expenses
-            const bestCase = calculateRunway(cash, expenses * 0.8, revenue, 0.15, 0.01);
-            document.getElementById('bestCase').textContent = bestCase.months;
-            
-            // Base case
-            const baseCase = calculateRunway(cash, expenses, revenue, 0.10, 0.02);
-            document.getElementById('baseCase').textContent = baseCase.months;
-            
-            // Worst case: no growth, 5% expense increase
-            const worstCase = calculateRunway(cash, expenses, revenue, 0, 0.05);
-            document.getElementById('worstCase').textContent = worstCase.months;
-        }
-
-        function updateFundraising(expenses, revenue) {
-            const netBurn = expenses - revenue;
-            
-            [12, 18, 24, 36].forEach(months => {
-                const amount = netBurn * months;
-                document.getElementById('raise' + months).textContent = formatCurrency(amount);
-            });
-        }
-
-        function selectFundraising(months) {
-            document.querySelectorAll('.fundraising-option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-            event.currentTarget.classList.add('selected');
-        }
-
-        // Chart
-        function initChart() {
+        function updateChart() {
             const ctx = document.getElementById('projectionChart').getContext('2d');
             
-            projectionChart = new Chart(ctx, {
+            if (chart) chart.destroy();
+            
+            chart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Cash Balance',
-                        data: [],
-                        borderColor: '#10B981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0,
-                        pointHoverRadius: 6
-                    }]
+                    labels: projectionData.map(d => d.label),
+                    datasets: [
+                        {
+                            label: 'Cash',
+                            data: projectionData.map(d => d.cash),
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Revenue',
+                            data: projectionData.map(d => d.revenue),
+                            borderColor: '#22c55e',
+                            borderDash: [5, 5],
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Expenses',
+                            data: projectionData.map(d => d.expenses),
+                            borderColor: '#ef4444',
+                            borderDash: [5, 5],
+                            tension: 0.4
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                            titleColor: '#F9FAFB',
-                            bodyColor: '#9CA3AF',
-                            borderColor: 'rgba(255,255,255,0.1)',
-                            borderWidth: 1,
-                            padding: 12,
-                            cornerRadius: 8,
-                            callbacks: {
-                                label: (context) => 'Cash: ' + formatCurrency(context.raw)
-                            }
+                            labels: { color: '#9ca3af' }
                         }
                     },
                     scales: {
                         x: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.05)'
-                            },
-                            ticks: {
-                                color: '#6B7280'
-                            }
+                            ticks: { color: '#6b7280' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
                         },
                         y: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.05)'
+                            ticks: { 
+                                color: '#6b7280',
+                                callback: v => '$' + (v/1000).toFixed(0) + 'k'
                             },
-                            ticks: {
-                                color: '#6B7280',
-                                callback: (value) => formatCurrency(value)
-                            }
+                            grid: { color: 'rgba(255,255,255,0.05)' }
                         }
-                    },
-                    interaction: {
-                        intersect: false,
-                        mode: 'index'
                     }
                 }
             });
         }
 
-        function updateChart(projection) {
-            const displayMonths = Math.min(projection.length, 25);
-            const labels = [];
-            const data = [];
-            
-            for (let i = 0; i < displayMonths; i++) {
-                labels.push('M' + i);
-                data.push(projection[i].cash);
-            }
-            
-            projectionChart.data.labels = labels;
-            projectionChart.data.datasets[0].data = data;
-            
-            // Color based on trend
-            const lastCash = data[data.length - 1];
-            if (lastCash <= 0) {
-                projectionChart.data.datasets[0].borderColor = '#EF4444';
-                projectionChart.data.datasets[0].backgroundColor = 'rgba(239, 68, 68, 0.1)';
+        function updateTable() {
+            const tbody = document.getElementById('monthlyTable');
+            tbody.innerHTML = projectionData.slice(0, 12).map(d => `
+                <tr class="border-t border-white/5">
+                    <td class="py-2">${d.label}</td>
+                    <td class="py-2 text-green-400">$${d.revenue.toLocaleString()}</td>
+                    <td class="py-2 text-red-400">$${d.expenses.toLocaleString()}</td>
+                    <td class="py-2 ${d.net >= 0 ? 'text-green-400' : 'text-red-400'}">${d.net >= 0 ? '+' : ''}$${d.net.toLocaleString()}</td>
+                    <td class="py-2 ${d.cash >= 0 ? 'text-white' : 'text-red-400'}">$${d.cash.toLocaleString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Waitlist modal
+        function joinWaitlist() {
+            document.getElementById('waitlistModal').classList.remove('hidden');
+            document.getElementById('waitlistModal').classList.add('flex');
+        }
+
+        function closeWaitlist() {
+            document.getElementById('waitlistModal').classList.add('hidden');
+            document.getElementById('waitlistModal').classList.remove('flex');
+        }
+
+        function submitWaitlist() {
+            const email = document.getElementById('waitlistEmail').value;
+            if (email && email.includes('@')) {
+                // In production, would send to backend
+                alert('Thanks! You\'re on the list. We\'ll email you when Pro launches.');
+                closeWaitlist();
             } else {
-                projectionChart.data.datasets[0].borderColor = '#10B981';
-                projectionChart.data.datasets[0].backgroundColor = 'rgba(16, 185, 129, 0.1)';
-            }
-            
-            projectionChart.update();
-        }
-
-        // Share results
-        function shareResults() {
-            const runway = document.getElementById('runwayMonths').textContent;
-            const netBurn = document.getElementById('netBurn').textContent;
-            const defaultDate = document.getElementById('defaultDate').textContent;
-            
-            const shareText = `📊 My Startup Runway Analysis:
-
-🚀 Runway: ${runway} months
-🔥 Net Burn: ${netBurn}/month
-💀 Default Date: ${defaultDate}
-
-Calculate yours at: https://rajkcho.github.io/Sleep2/
-
-#startup #founders #runwaycalculator`;
-
-            if (navigator.share) {
-                navigator.share({
-                    title: 'My Startup Runway',
-                    text: shareText,
-                    url: 'https://rajkcho.github.io/Sleep2/'
-                }).catch(() => {
-                    copyToClipboard(shareText);
-                });
-            } else {
-                copyToClipboard(shareText);
+                alert('Please enter a valid email.');
             }
         }
 
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('Copied to clipboard! 📋', 'success');
-            }).catch(() => {
-                showToast('Failed to copy');
+        // Export PDF
+        async function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            
+            // Header
+            pdf.setFontSize(24);
+            pdf.setTextColor(99, 102, 241);
+            pdf.text('RunwayCalc Report', 20, 25);
+            
+            pdf.setFontSize(10);
+            pdf.setTextColor(100);
+            pdf.text('Generated: ' + new Date().toLocaleDateString(), 20, 32);
+            
+            // Summary
+            pdf.setFontSize(14);
+            pdf.setTextColor(30);
+            pdf.text('Summary', 20, 45);
+            
+            pdf.setFontSize(11);
+            pdf.text('Cash on Hand: $' + parseNum('cash').toLocaleString(), 25, 55);
+            pdf.text('Monthly Revenue: $' + parseNum('mrr').toLocaleString(), 25, 62);
+            pdf.text('Monthly Expenses: $' + parseNum('expenses').toLocaleString(), 25, 69);
+            pdf.text('Revenue Growth: ' + document.getElementById('growth').value + '%/mo', 25, 76);
+            pdf.text('Runway: ' + document.getElementById('runwayValue').textContent, 25, 83);
+            pdf.text('Break-even: ' + document.getElementById('breakEvenValue').textContent, 25, 90);
+            
+            // Table
+            pdf.setFontSize(14);
+            pdf.text('12-Month Projection', 20, 105);
+            
+            let y = 115;
+            pdf.setFontSize(9);
+            pdf.setTextColor(100);
+            pdf.text('Month', 25, y);
+            pdf.text('Revenue', 55, y);
+            pdf.text('Expenses', 85, y);
+            pdf.text('Net', 115, y);
+            pdf.text('Cash', 145, y);
+            
+            pdf.setTextColor(30);
+            projectionData.slice(0, 12).forEach((d, i) => {
+                y += 7;
+                pdf.text(d.label, 25, y);
+                pdf.text('$' + d.revenue.toLocaleString(), 55, y);
+                pdf.text('$' + d.expenses.toLocaleString(), 85, y);
+                pdf.text((d.net >= 0 ? '+' : '') + '$' + d.net.toLocaleString(), 115, y);
+                pdf.text('$' + d.cash.toLocaleString(), 145, y);
             });
+            
+            // Footer
+            pdf.setFontSize(8);
+            pdf.setTextColor(150);
+            pdf.text('Generated by RunwayCalc — runwaycalc.com', 20, 285);
+            
+            pdf.save('runway-projection.pdf');
         }
 
-        // Export to PDF
-        function exportToPDF() {
-            showToast('Preparing PDF... Print dialog will open', 'success');
-            setTimeout(() => {
-                window.print();
-            }, 500);
-        }
-
-        // Startup presets
-        const STARTUP_PRESETS = {
-            bootstrapped: {
-                name: 'Bootstrapped',
-                cash: 50000,
-                expenses: 5000,
-                revenue: 3000,
-                revenueGrowth: 8,
-                expenseGrowth: 1
-            },
-            seed: {
-                name: 'Seed Stage',
-                cash: 500000,
-                expenses: 45000,
-                revenue: 8000,
-                revenueGrowth: 15,
-                expenseGrowth: 3
-            },
-            seriesA: {
-                name: 'Series A',
-                cash: 5000000,
-                expenses: 350000,
-                revenue: 80000,
-                revenueGrowth: 12,
-                expenseGrowth: 5
-            }
-        };
-
-        function loadPreset(presetName) {
-            const preset = STARTUP_PRESETS[presetName];
-            if (!preset) return;
-
-            document.getElementById('cashInBank').value = formatNumber(preset.cash);
-            document.getElementById('monthlyExpenses').value = formatNumber(preset.expenses);
-            document.getElementById('monthlyRevenue').value = formatNumber(preset.revenue);
-            document.getElementById('revenueGrowth').value = preset.revenueGrowth;
-            document.getElementById('expenseGrowth').value = preset.expenseGrowth;
-
-            updateSlider(document.getElementById('revenueGrowth'));
-            updateSlider(document.getElementById('expenseGrowth'));
-
-            calculate();
-            showToast(`Loaded ${preset.name} preset!`, 'success');
-        }
-
-        // Reset calculator
-        function resetCalculator() {
-            document.getElementById('cashInBank').value = '500,000';
-            document.getElementById('monthlyExpenses').value = '45,000';
-            document.getElementById('monthlyRevenue').value = '8,000';
-            document.getElementById('revenueGrowth').value = 10;
-            document.getElementById('expenseGrowth').value = 2;
-            
-            updateSlider(document.getElementById('revenueGrowth'));
-            updateSlider(document.getElementById('expenseGrowth'));
-            
-            calculate();
-            showToast('Calculator reset!', 'success');
-        }
-
-        // Email capture
-        function captureEmail() {
-            const email = document.getElementById('userEmail').value;
-            if (!email || !email.includes('@')) {
-                showToast('Please enter a valid email address');
-                return;
-            }
-            
-            // Store email (in real app, would send to backend)
-            localStorage.setItem('runwaycalc_email', email);
-            
-            showToast('Report sent! Check your inbox 📧', 'success');
-            document.getElementById('userEmail').value = '';
-        }
-
-        // Toast
-        function showToast(message, type = 'info') {
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
-            
-            toast.className = 'toast';
-            if (type === 'success') toast.classList.add('success');
-            toastMessage.textContent = message;
-            toast.classList.add('visible');
-            
-            setTimeout(() => {
-                toast.classList.remove('visible');
-            }, 3000);
-        }
-
-        // Number animation
-        function animateNumber(element, end, duration = 500, prefix = '', suffix = '') {
-            const start = 0;
-            const startTime = performance.now();
-            
-            function update(currentTime) {
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                const easeProgress = 1 - Math.pow(1 - progress, 3);
-                const current = Math.round(start + (end - start) * easeProgress);
-                
-                element.textContent = prefix + current + suffix;
-                
-                if (progress < 1) {
-                    requestAnimationFrame(update);
-                }
-            }
-            
-            requestAnimationFrame(update);
-        }
-
-        // Track views (for social proof)
-        function trackView() {
-            let views = parseInt(localStorage.getItem('runwaycalc_totalviews') || '0');
-            views++;
-            localStorage.setItem('runwaycalc_totalviews', views.toString());
-        }
-        trackView();
-
-        // Scroll reveal
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.feature-card, .partner-card, .stat-card, .scenario-card').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(30px)';
-            el.style.transition = 'all 0.6s ease';
-            revealObserver.observe(el);
-        });
+        // Init
+        calculate();
     </script>
 </body>
 </html>
