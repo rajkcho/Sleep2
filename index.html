@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RunwayCalc | Know Exactly When Your Startup Runs Out of Money</title>
+    
+    <!-- SEO -->
+    <meta name="description" content="Free startup runway calculator. Know exactly how many months until you run out of cash. Scenario planning, burn rate analysis, and fundraising targets for founders.">
+    <meta name="keywords" content="startup runway calculator, burn rate calculator, startup cash flow, when will my startup run out of money, fundraising calculator, startup finance">
+    <meta name="author" content="Raj Chopra">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="RunwayCalc | Know Exactly When Your Startup Runs Out of Money">
+    <meta property="og:description" content="Free startup runway calculator with scenario planning. Know your burn rate, runway, and fundraising targets.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://rajkcho.github.io/Sleep2/">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="RunwayCalc | Startup Runway Calculator">
+    <meta name="twitter:description" content="Know exactly when your startup runs out of money. Free calculator with scenario planning.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #10B981;
+            --primary-light: #34D399;
+            --primary-dark: #059669;
+            --secondary: #6366F1;
+            --accent: #F59E0B;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --bg-dark: #0A0F1C;
+            --bg-card: #111827;
+            --bg-elevated: #1F2937;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #F9FAFB;
+            --text-secondary: #9CA3AF;
+            --text-muted: #6B7280;
+            --gradient-1: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            --gradient-2: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            --gradient-danger: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Background */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            background-image: 
+                linear-gradient(rgba(16, 185, 129, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(16, 185, 129, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -2;
+            background: 
+                radial-gradient(ellipse at 20% 0%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 100%, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 16px 0;
+            background: rgba(10, 15, 28, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-text {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--glass);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .btn-lg {
+            padding: 18px 36px;
+            font-size: 1.1rem;
+        }
+
+        /* Hero */
+        .hero {
+            padding: 160px 0 100px;
+            text-align: center;
+        }
+
+        .hero-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 100px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            margin-bottom: 32px;
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            letter-spacing: -2px;
+            animation: fadeInUp 0.6s ease 0.1s forwards;
+            opacity: 0;
+        }
+
+        .hero-title .highlight {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.35rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            animation: fadeInUp 0.6s ease 0.2s forwards;
+            opacity: 0;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            animation: fadeInUp 0.6s ease 0.3s forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Calculator Section */
+        .calculator-section {
+            padding: 80px 0;
+        }
+
+        .calculator-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 40px;
+        }
+
+        /* Input Panel */
+        .input-panel {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 32px;
+            border: 1px solid var(--glass-border);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-section {
+            margin-bottom: 28px;
+        }
+
+        .input-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .input-section-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 16px;
+            padding-left: 36px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+
+        .input-prefix {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .input-suffix {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .input-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        /* Slider Input */
+        .slider-group {
+            margin-bottom: 20px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .slider-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .slider-value {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--primary-light);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            background: var(--bg-elevated);
+            border-radius: 4px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            background: var(--gradient-1);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+            transition: transform 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        /* Results Panel */
+        .results-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Runway Card - Main Result */
+        .runway-card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 40px;
+            border: 1px solid var(--glass-border);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .runway-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-1);
+        }
+
+        .runway-card.danger::before {
+            background: var(--gradient-danger);
+        }
+
+        .runway-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .runway-value {
+            font-size: 6rem;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 8px;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .runway-card.danger .runway-value {
+            background: var(--gradient-danger);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .runway-unit {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .runway-date {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--bg-elevated);
+            border-radius: 100px;
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .runway-date strong {
+            color: var(--text-primary);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--glass-border);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-value.positive {
+            color: var(--primary-light);
+        }
+
+        .stat-value.negative {
+            color: var(--danger);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Chart Card */
+        .chart-card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 32px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .chart-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        /* Scenario Cards */
+        .scenarios-section {
+            margin-top: 24px;
+        }
+
+        .scenarios-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .scenarios-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .scenario-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+        }
+
+        .scenario-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .scenario-card.best {
+            border-color: var(--primary);
+        }
+
+        .scenario-card.worst {
+            border-color: var(--danger);
+        }
+
+        .scenario-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .scenario-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 4px;
+        }
+
+        .scenario-card.best .scenario-value {
+            color: var(--primary-light);
+        }
+
+        .scenario-card.base .scenario-value {
+            color: var(--secondary);
+        }
+
+        .scenario-card.worst .scenario-value {
+            color: var(--danger);
+        }
+
+        .scenario-detail {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Fundraising Calculator */
+        .fundraising-section {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 32px;
+            border: 1px solid var(--glass-border);
+            margin-top: 24px;
+        }
+
+        .fundraising-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .fundraising-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fundraising-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .fundraising-option {
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .fundraising-option:hover {
+            border-color: var(--primary);
+        }
+
+        .fundraising-option.selected {
+            border-color: var(--primary);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .fundraising-months {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .fundraising-amount {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-light);
+        }
+
+        /* Partners Section */
+        .partners-section {
+            padding: 80px 0;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .partners-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px;
+            text-align: center;
+        }
+
+        .section-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 48px;
+        }
+
+        .partners-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .partner-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px 24px;
+            border: 1px solid var(--glass-border);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .partner-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .partner-logo {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        .partner-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .partner-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .partner-cta {
+            font-size: 0.85rem;
+            color: var(--primary-light);
+            font-weight: 600;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 80px 0;
+        }
+
+        .features-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .feature-desc {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 100px 0;
+            background: var(--gradient-1);
+            text-align: center;
+        }
+
+        .cta-container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 16px;
+        }
+
+        .cta-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 32px;
+        }
+
+        .cta-section .btn {
+            background: white;
+            color: var(--primary-dark);
+        }
+
+        /* Footer */
+        .footer {
+            padding: 48px 0;
+            border-top: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .footer-text a {
+            color: var(--primary-light);
+            text-decoration: none;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .input-panel {
+                position: static;
+            }
+
+            .hero-title {
+                font-size: 3rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .stats-grid,
+            .scenarios-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .fundraising-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .partners-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-cta {
+                flex-direction: column;
+            }
+
+            .runway-value {
+                font-size: 4rem;
+            }
+
+            .stats-grid,
+            .scenarios-grid,
+            .fundraising-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .partners-grid,
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .cta-title {
+                font-size: 2rem;
+            }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 16px 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s ease;
+            z-index: 3000;
+        }
+
+        .toast.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-color: var(--primary);
+        }
+
+        /* Animations */
+        .animate-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        /* Email capture */
+        .email-capture {
+            background: var(--bg-elevated);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+
+        .email-capture-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .email-form {
+            display: flex;
+            gap: 12px;
+        }
+
+        .email-form input {
+            flex: 1;
+            padding: 14px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .email-form input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .email-form button {
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-gradient"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <span>🚀</span>
+                <span class="logo-text">RunwayCalc</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#calculator">Calculator</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#partners">Tools</a></li>
+            </ul>
+            <a href="#calculator" class="btn btn-primary">Calculate Now</a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-badge">
+                <span>🎯</span>
+                <span>Free • No Sign Up • Instant Results</span>
+            </div>
+            <h1 class="hero-title">
+                Know <span class="highlight">Exactly</span> When Your Startup Runs Out of Money
+            </h1>
+            <p class="hero-subtitle">
+                Calculate your runway, model scenarios, and know exactly how much to raise. Built for founders by founders.
+            </p>
+            <div class="hero-cta">
+                <a href="#calculator" class="btn btn-primary btn-lg">Calculate Your Runway →</a>
+                <a href="#features" class="btn btn-secondary btn-lg">See Features</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Calculator Section -->
+    <section class="calculator-section" id="calculator">
+        <div class="calculator-container">
+            <div class="calculator-grid">
+                <!-- Input Panel -->
+                <div class="input-panel">
+                    <h2 class="panel-title">📊 Your Numbers</h2>
+                    
+                    <div class="input-section">
+                        <div class="input-section-title">💰 Current Position</div>
+                        <div class="input-group">
+                            <label>Cash in Bank</label>
+                            <div class="input-wrapper">
+                                <span class="input-prefix">$</span>
+                                <input type="text" id="cashInBank" value="500,000" oninput="formatAndCalculate(this)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-section">
+                        <div class="input-section-title">🔥 Monthly Burn</div>
+                        <div class="input-group">
+                            <label>Monthly Expenses</label>
+                            <div class="input-wrapper">
+                                <span class="input-prefix">$</span>
+                                <input type="text" id="monthlyExpenses" value="45,000" oninput="formatAndCalculate(this)">
+                            </div>
+                            <div class="input-hint">Salaries, rent, tools, marketing, etc.</div>
+                        </div>
+                        <div class="input-group">
+                            <label>Monthly Revenue</label>
+                            <div class="input-wrapper">
+                                <span class="input-prefix">$</span>
+                                <input type="text" id="monthlyRevenue" value="8,000" oninput="formatAndCalculate(this)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-section">
+                        <div class="input-section-title">📈 Growth Assumptions</div>
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label">Revenue Growth (Monthly)</span>
+                                <span class="slider-value" id="revenueGrowthValue">10%</span>
+                            </div>
+                            <input type="range" id="revenueGrowth" min="0" max="50" value="10" oninput="updateSlider(this); calculate();">
+                        </div>
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label">Expense Growth (Monthly)</span>
+                                <span class="slider-value" id="expenseGrowthValue">2%</span>
+                            </div>
+                            <input type="range" id="expenseGrowth" min="0" max="20" value="2" oninput="updateSlider(this); calculate();">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 16px;" onclick="calculate()">
+                        🔄 Recalculate
+                    </button>
+                </div>
+
+                <!-- Results Panel -->
+                <div class="results-panel">
+                    <!-- Main Runway Card -->
+                    <div class="runway-card" id="runwayCard">
+                        <div class="runway-label">Your Runway</div>
+                        <div class="runway-value" id="runwayMonths">11</div>
+                        <div class="runway-unit">months</div>
+                        <div class="runway-date">
+                            💀 Default Date: <strong id="defaultDate">Jan 2027</strong>
+                        </div>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">🔥</div>
+                            <div class="stat-value negative" id="netBurn">-$37K</div>
+                            <div class="stat-label">Net Burn / Month</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📉</div>
+                            <div class="stat-value" id="burnMultiple">5.6x</div>
+                            <div class="stat-label">Burn Multiple</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🎯</div>
+                            <div class="stat-value" id="breakevenMonths">24</div>
+                            <div class="stat-label">Months to Breakeven</div>
+                        </div>
+                    </div>
+
+                    <!-- Chart -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">📈 Cash Projection</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="projectionChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Scenarios -->
+                    <div class="scenarios-section">
+                        <h3 class="scenarios-title">🎲 Scenario Analysis</h3>
+                        <div class="scenarios-grid">
+                            <div class="scenario-card best">
+                                <div class="scenario-name">Best Case</div>
+                                <div class="scenario-value" id="bestCase">18</div>
+                                <div class="scenario-detail">months runway</div>
+                            </div>
+                            <div class="scenario-card base">
+                                <div class="scenario-name">Base Case</div>
+                                <div class="scenario-value" id="baseCase">11</div>
+                                <div class="scenario-detail">months runway</div>
+                            </div>
+                            <div class="scenario-card worst">
+                                <div class="scenario-name">Worst Case</div>
+                                <div class="scenario-value" id="worstCase">7</div>
+                                <div class="scenario-detail">months runway</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fundraising Calculator -->
+                    <div class="fundraising-section">
+                        <div class="fundraising-header">
+                            <h3 class="fundraising-title">💸 How Much Should You Raise?</h3>
+                        </div>
+                        <div class="fundraising-grid">
+                            <div class="fundraising-option" onclick="selectFundraising(12)">
+                                <div class="fundraising-months">12 months</div>
+                                <div class="fundraising-amount" id="raise12">$444K</div>
+                            </div>
+                            <div class="fundraising-option selected" onclick="selectFundraising(18)">
+                                <div class="fundraising-months">18 months</div>
+                                <div class="fundraising-amount" id="raise18">$666K</div>
+                            </div>
+                            <div class="fundraising-option" onclick="selectFundraising(24)">
+                                <div class="fundraising-months">24 months</div>
+                                <div class="fundraising-amount" id="raise24">$888K</div>
+                            </div>
+                            <div class="fundraising-option" onclick="selectFundraising(36)">
+                                <div class="fundraising-months">36 months</div>
+                                <div class="fundraising-amount" id="raise36">$1.3M</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email Capture -->
+                    <div class="email-capture">
+                        <div class="email-capture-title">📧 Get Your Full Report (Free)</div>
+                        <div class="email-form">
+                            <input type="email" id="userEmail" placeholder="you@startup.com">
+                            <button class="btn btn-primary" onclick="captureEmail()">Send Report</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Partners Section -->
+    <section class="partners-section" id="partners">
+        <div class="partners-container">
+            <div class="section-badge">🛠️ Tools We Recommend</div>
+            <h2 class="section-title">Startup Tools That Actually Help</h2>
+            <p class="section-subtitle">The tools top startups use to manage their finances</p>
+            <div class="partners-grid">
+                <a href="https://mercury.com" target="_blank" rel="noopener" class="partner-card">
+                    <div class="partner-logo">🏦</div>
+                    <div class="partner-name">Mercury</div>
+                    <div class="partner-desc">Banking built for startups. No fees, powerful tools.</div>
+                    <div class="partner-cta">Open Free Account →</div>
+                </a>
+                <a href="https://stripe.com/atlas" target="_blank" rel="noopener" class="partner-card">
+                    <div class="partner-logo">⚡</div>
+                    <div class="partner-name">Stripe Atlas</div>
+                    <div class="partner-desc">Incorporate your startup in Delaware in days.</div>
+                    <div class="partner-cta">Start Your Company →</div>
+                </a>
+                <a href="https://carta.com" target="_blank" rel="noopener" class="partner-card">
+                    <div class="partner-logo">📊</div>
+                    <div class="partner-name">Carta</div>
+                    <div class="partner-desc">Cap table management and equity planning.</div>
+                    <div class="partner-cta">Manage Equity →</div>
+                </a>
+                <a href="https://brex.com" target="_blank" rel="noopener" class="partner-card">
+                    <div class="partner-logo">💳</div>
+                    <div class="partner-name">Brex</div>
+                    <div class="partner-desc">Corporate cards with 10-20x higher limits.</div>
+                    <div class="partner-cta">Get Your Card →</div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+        <div class="features-container">
+            <div style="text-align: center;">
+                <div class="section-badge">✨ Features</div>
+                <h2 class="section-title">Built for Founders Who Move Fast</h2>
+                <p class="section-subtitle">Everything you need to understand your startup's financial health.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">Instant Runway Calculation</h3>
+                    <p class="feature-desc">See exactly how many months of runway you have based on your current cash and burn rate.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3 class="feature-title">Growth Modeling</h3>
+                    <p class="feature-desc">Factor in revenue growth and expense changes to see how your runway evolves over time.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎲</div>
+                    <h3 class="feature-title">Scenario Planning</h3>
+                    <p class="feature-desc">See best, base, and worst case scenarios to plan for different outcomes.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💸</div>
+                    <h3 class="feature-title">Fundraising Calculator</h3>
+                    <p class="feature-desc">Know exactly how much to raise for 12, 18, 24, or 36 months of runway.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Visual Projections</h3>
+                    <p class="feature-desc">Beautiful charts showing your cash projection over the next 24 months.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3 class="feature-title">100% Private</h3>
+                    <p class="feature-desc">All calculations happen in your browser. We never see your numbers.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-container">
+            <h2 class="cta-title">Know Your Numbers. Make Better Decisions.</h2>
+            <p class="cta-subtitle">Join thousands of founders who use RunwayCalc to plan their startup's future.</p>
+            <a href="#calculator" class="btn btn-lg">Calculate Your Runway →</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-text">
+            Built with ☕ by <a href="https://github.com/rajkcho" target="_blank">Raj Chopra</a> • 
+            © 2025 RunwayCalc • 
+            <a href="#calculator">Calculate Now</a>
+        </div>
+    </footer>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        // ============================================
+        // RUNWAYCALC - MAIN APPLICATION
+        // ============================================
+
+        let projectionChart = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            calculate();
+            initChart();
+        });
+
+        // Format number with commas
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // Parse formatted number
+        function parseNumber(str) {
+            return parseFloat(str.replace(/[^0-9.-]+/g, '')) || 0;
+        }
+
+        // Format currency
+        function formatCurrency(num) {
+            if (Math.abs(num) >= 1000000) {
+                return '$' + (num / 1000000).toFixed(1) + 'M';
+            } else if (Math.abs(num) >= 1000) {
+                return '$' + (num / 1000).toFixed(0) + 'K';
+            }
+            return '$' + formatNumber(Math.round(num));
+        }
+
+        // Format and recalculate
+        function formatAndCalculate(input) {
+            const value = parseNumber(input.value);
+            input.value = formatNumber(value);
+            calculate();
+        }
+
+        // Update slider display
+        function updateSlider(slider) {
+            const valueEl = document.getElementById(slider.id + 'Value');
+            valueEl.textContent = slider.value + '%';
+        }
+
+        // Main calculation
+        function calculate() {
+            const cash = parseNumber(document.getElementById('cashInBank').value);
+            const expenses = parseNumber(document.getElementById('monthlyExpenses').value);
+            const revenue = parseNumber(document.getElementById('monthlyRevenue').value);
+            const revenueGrowth = parseFloat(document.getElementById('revenueGrowth').value) / 100;
+            const expenseGrowth = parseFloat(document.getElementById('expenseGrowth').value) / 100;
+
+            // Calculate runway with growth
+            const runwayData = calculateRunway(cash, expenses, revenue, revenueGrowth, expenseGrowth);
+            
+            // Update main display
+            updateMainDisplay(runwayData);
+            
+            // Update stats
+            updateStats(expenses, revenue, revenueGrowth);
+            
+            // Update scenarios
+            updateScenarios(cash, expenses, revenue);
+            
+            // Update fundraising
+            updateFundraising(expenses, revenue);
+            
+            // Update chart
+            updateChart(runwayData.projection);
+        }
+
+        function calculateRunway(cash, expenses, revenue, revenueGrowth, expenseGrowth) {
+            let currentCash = cash;
+            let currentRevenue = revenue;
+            let currentExpenses = expenses;
+            let months = 0;
+            const projection = [{ month: 0, cash: currentCash, revenue: currentRevenue, expenses: currentExpenses }];
+            
+            while (currentCash > 0 && months < 60) {
+                months++;
+                currentRevenue *= (1 + revenueGrowth);
+                currentExpenses *= (1 + expenseGrowth);
+                const netBurn = currentExpenses - currentRevenue;
+                currentCash -= netBurn;
+                
+                projection.push({
+                    month: months,
+                    cash: Math.max(0, currentCash),
+                    revenue: currentRevenue,
+                    expenses: currentExpenses,
+                    netBurn: netBurn
+                });
+                
+                if (currentCash <= 0) break;
+            }
+            
+            return { months, projection };
+        }
+
+        function updateMainDisplay(runwayData) {
+            const months = runwayData.months;
+            const runwayCard = document.getElementById('runwayCard');
+            
+            document.getElementById('runwayMonths').textContent = months;
+            
+            // Calculate default date
+            const defaultDate = new Date();
+            defaultDate.setMonth(defaultDate.getMonth() + months);
+            const options = { month: 'short', year: 'numeric' };
+            document.getElementById('defaultDate').textContent = defaultDate.toLocaleDateString('en-US', options);
+            
+            // Set card color based on runway
+            if (months <= 6) {
+                runwayCard.classList.add('danger');
+            } else {
+                runwayCard.classList.remove('danger');
+            }
+        }
+
+        function updateStats(expenses, revenue, revenueGrowth) {
+            const netBurn = expenses - revenue;
+            document.getElementById('netBurn').textContent = (netBurn >= 0 ? '-' : '+') + formatCurrency(Math.abs(netBurn));
+            document.getElementById('netBurn').className = 'stat-value ' + (netBurn > 0 ? 'negative' : 'positive');
+            
+            // Burn multiple = net burn / new ARR
+            const newMRR = revenue * revenueGrowth;
+            const burnMultiple = newMRR > 0 ? (netBurn / newMRR).toFixed(1) : '∞';
+            document.getElementById('burnMultiple').textContent = burnMultiple + 'x';
+            
+            // Months to breakeven
+            if (netBurn <= 0) {
+                document.getElementById('breakevenMonths').textContent = '✓';
+            } else if (revenueGrowth <= 0) {
+                document.getElementById('breakevenMonths').textContent = '∞';
+            } else {
+                // Simplified calculation
+                let months = 0;
+                let currentRevenue = revenue;
+                while (currentRevenue < expenses && months < 60) {
+                    currentRevenue *= (1 + revenueGrowth);
+                    months++;
+                }
+                document.getElementById('breakevenMonths').textContent = months < 60 ? months : '60+';
+            }
+        }
+
+        function updateScenarios(cash, expenses, revenue) {
+            // Best case: 20% higher revenue growth, 50% lower expenses
+            const bestCase = calculateRunway(cash, expenses * 0.8, revenue, 0.15, 0.01);
+            document.getElementById('bestCase').textContent = bestCase.months;
+            
+            // Base case
+            const baseCase = calculateRunway(cash, expenses, revenue, 0.10, 0.02);
+            document.getElementById('baseCase').textContent = baseCase.months;
+            
+            // Worst case: no growth, 5% expense increase
+            const worstCase = calculateRunway(cash, expenses, revenue, 0, 0.05);
+            document.getElementById('worstCase').textContent = worstCase.months;
+        }
+
+        function updateFundraising(expenses, revenue) {
+            const netBurn = expenses - revenue;
+            
+            [12, 18, 24, 36].forEach(months => {
+                const amount = netBurn * months;
+                document.getElementById('raise' + months).textContent = formatCurrency(amount);
+            });
+        }
+
+        function selectFundraising(months) {
+            document.querySelectorAll('.fundraising-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+        }
+
+        // Chart
+        function initChart() {
+            const ctx = document.getElementById('projectionChart').getContext('2d');
+            
+            projectionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Cash Balance',
+                        data: [],
+                        borderColor: '#10B981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                            titleColor: '#F9FAFB',
+                            bodyColor: '#9CA3AF',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: (context) => 'Cash: ' + formatCurrency(context.raw)
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#6B7280'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#6B7280',
+                                callback: (value) => formatCurrency(value)
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        }
+
+        function updateChart(projection) {
+            const displayMonths = Math.min(projection.length, 25);
+            const labels = [];
+            const data = [];
+            
+            for (let i = 0; i < displayMonths; i++) {
+                labels.push('M' + i);
+                data.push(projection[i].cash);
+            }
+            
+            projectionChart.data.labels = labels;
+            projectionChart.data.datasets[0].data = data;
+            
+            // Color based on trend
+            const lastCash = data[data.length - 1];
+            if (lastCash <= 0) {
+                projectionChart.data.datasets[0].borderColor = '#EF4444';
+                projectionChart.data.datasets[0].backgroundColor = 'rgba(239, 68, 68, 0.1)';
+            } else {
+                projectionChart.data.datasets[0].borderColor = '#10B981';
+                projectionChart.data.datasets[0].backgroundColor = 'rgba(16, 185, 129, 0.1)';
+            }
+            
+            projectionChart.update();
+        }
+
+        // Email capture
+        function captureEmail() {
+            const email = document.getElementById('userEmail').value;
+            if (!email || !email.includes('@')) {
+                showToast('Please enter a valid email address');
+                return;
+            }
+            
+            // Store email (in real app, would send to backend)
+            localStorage.setItem('runwaycalc_email', email);
+            
+            showToast('Report sent! Check your inbox 📧', 'success');
+            document.getElementById('userEmail').value = '';
+        }
+
+        // Toast
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toast.className = 'toast';
+            if (type === 'success') toast.classList.add('success');
+            toastMessage.textContent = message;
+            toast.classList.add('visible');
+            
+            setTimeout(() => {
+                toast.classList.remove('visible');
+            }, 3000);
+        }
+
+        // Scroll reveal
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.feature-card, .partner-card, .stat-card, .scenario-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.6s ease';
+            revealObserver.observe(el);
+        });
+    </script>
+</body>
+</html>
